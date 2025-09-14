@@ -3,7 +3,7 @@ const CACHE_LIST = [
     "/index.html",
     "/prog.js",
     "/prog.wasm",
-    "/manifest.json"
+    "/manifest.webmanifest"
 ];
 
 self.addEventListener("install", (event) => {
