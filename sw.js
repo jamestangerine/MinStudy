@@ -1,9 +1,9 @@
 const CACHE_LIST = [
-    "/",
-    "/index.html",
-    "/prog.js",
-    "/prog.wasm",
-    "/manifest.webmanifest"
+    "/MinStudy/",
+    "/MinStudy/index.html",
+    "/MinStudy/prog.js",
+    "/MinStudy/prog.wasm",
+    "/MinStudy/manifest.webmanifest"
 ];
 
 self.addEventListener("install", (event) => {
