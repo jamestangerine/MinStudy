@@ -12,9 +12,9 @@
         if ("serviceWorker" in navigator) {
             navigator.serviceWorker.register("sw.js");
         }
-        import cMod from "./prog.js";
         const h1 = document.getElementById("t");
-        cMod().then((mod) => {
+        import Module from "./prog.js";
+        Module().then((mod) => {
             h1.innerText = "t";
         });
     </script>
