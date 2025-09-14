@@ -2,6 +2,7 @@
 <html>
     <head>
         <link rel="manifest" href="manifest.json">
+        <link rel="icon" href="data:,">
     </head>
     <body style="background-color: #000000; color: #ffffff;">
         <h1 id="t">hi</h1>
@@ -10,9 +11,9 @@
         if ("serviceWorker" in navigator) {
             navigator.serviceWorker.register("sw.js");
         }
-        import Module from "./prog.js";
+        import cMod from "./prog.js";
         const h1 = document.getElementById("t");
-        Module().then((mod) => {
+        cMod().then((mod) => {
             h1.innerText = "t";
         });
     </script>
