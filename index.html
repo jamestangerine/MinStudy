@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="manifest" href="manifest.json">
+    </head>
+    <body style="background-color: #000000; color: #ffffff;">
+        <h1 id="t">hi</h1>
+    </body>
+    <script type="module">
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("sw.js");
+        }
+        import Module from "./prog.js";
+        const h1 = document.getElementById("t");
+        Module().then((mod) => {
+            h1.innerText = "t";
+        });
+    </script>
+</html>
