@@ -9,7 +9,14 @@
     <body>
         <h1>Minimal Studier</h1>
         <p>Enter a study list.</p>
-        <textarea  id="input" rows="8" cols="50" placeholder="term&#9;definition&#10;term&#9;definition&#10;term&#9;definition&#10;..."></textarea>
+        <textarea id="input" rows="8" cols="50" placeholder="term&#9;definition&#10;term&#9;definition&#10;term&#9;definition&#10;..."></textarea>
+        <br><p>Coding Separators:</p>
+        <table>
+            <tr>
+                <td>Term-Def: <textarea rows="1" cols="5" placeholder="\t"></textarea></td>
+                <td>&#9;Entry: <textarea rows="1" cols="5" placeholder="\n"></textarea></td>
+            </tr>
+        </table>
     </body>
     <script type="module">
         if ("serviceWorker" in navigator) {
