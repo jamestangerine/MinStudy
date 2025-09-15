@@ -1,11 +1,12 @@
-const currentVersion = "v0.0.1";
+const currentVersion = "v0.0.2";
 
 const CACHE_LIST = [
     "/MinStudy/",
     "/MinStudy/index.html",
     "/MinStudy/prog.js",
     "/MinStudy/prog.wasm",
-    "/MinStudy/manifest.webmanifest"
+    "/MinStudy/manifest.webmanifest",
+    "/MinStudy/site.css",
 ];
 
 self.addEventListener("install", (event) => {
