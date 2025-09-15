@@ -6,16 +6,17 @@
         <link rel="icon" href="data:,">
     </head>
     <body style="background-color: #000000; color: #ffffff;">
-        <h1 id="t">hi</h1>
+        <h1>Minimal Studier</h1>
+        <p>Enter a study list.</p>
+        <textarea id="input" rows="8" cols="50" placeholder="term1  def1\nterm2 def2\nterm3 def3"></textarea>
     </body>
     <script type="module">
         if ("serviceWorker" in navigator) {
             navigator.serviceWorker.register("sw.js");
         }
-        const h1 = document.getElementById("t");
         import Module from "./prog.js";
         Module().then((mod) => {
-            h1.innerText = mod._add(1, 2).toString();
+
         });
     </script>
 </html>

@@ -1,3 +1,5 @@
+const currentVersion = "v0.0.1";
+
 const CACHE_LIST = [
     "/MinStudy/",
     "/MinStudy/index.html",
@@ -8,7 +10,7 @@ const CACHE_LIST = [
 
 self.addEventListener("install", (event) => {
     event.waitUntil(
-        caches.open("v1").then((cache) => {
+        caches.open(currentVersion).then((cache) => {
             return cache.addAll(CACHE_LIST);
         })
     );
@@ -20,7 +22,7 @@ self.addEventListener("activate", (event) => {
         caches.keys().then((cacheNames) => {
             return Promise.all(
                 cacheNames.map((cacheName) => {
-                    if (cacheName !== "v1") {
+                    if (cacheName !== currentVersion) {
                         return caches.delete(cacheName);
                     }
                 })
