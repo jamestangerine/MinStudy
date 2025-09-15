@@ -15,7 +15,7 @@
         const h1 = document.getElementById("t");
         import Module from "./prog.js";
         Module().then((mod) => {
-            h1.innerText = "t";
+            h1.innerText = mod._add(1, 2).toString();
         });
     </script>
 </html>
