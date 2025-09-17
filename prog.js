@@ -779,6 +779,8 @@ async function createWasm() {
         err(text);
       }
     };
+
+  var _emscripten_date_now = () => Date.now();
 // End JS library code
 
 // include: postlibrary.js
@@ -1245,7 +1247,7 @@ function checkIncomingModuleAPI() {
 }
 
 // Imports from the Wasm binary.
-var _add = Module['_add'] = makeInvalidEarlyAccess('_add');
+var _shuffle = Module['_shuffle'] = makeInvalidEarlyAccess('_shuffle');
 var _fflush = makeInvalidEarlyAccess('_fflush');
 var _emscripten_stack_init = makeInvalidEarlyAccess('_emscripten_stack_init');
 var _emscripten_stack_get_free = makeInvalidEarlyAccess('_emscripten_stack_get_free');
@@ -1256,7 +1258,7 @@ var __emscripten_stack_alloc = makeInvalidEarlyAccess('__emscripten_stack_alloc'
 var _emscripten_stack_get_current = makeInvalidEarlyAccess('_emscripten_stack_get_current');
 
 function assignWasmExports(wasmExports) {
-  Module['_add'] = _add = createExportWrapper('add', 2);
+  Module['_shuffle'] = _shuffle = createExportWrapper('shuffle', 2);
   _fflush = createExportWrapper('fflush', 1);
   _emscripten_stack_init = wasmExports['emscripten_stack_init'];
   _emscripten_stack_get_free = wasmExports['emscripten_stack_get_free'];
@@ -1267,7 +1269,8 @@ function assignWasmExports(wasmExports) {
   _emscripten_stack_get_current = wasmExports['emscripten_stack_get_current'];
 }
 var wasmImports = {
-  
+  /** @export */
+  emscripten_date_now: _emscripten_date_now
 };
 
 

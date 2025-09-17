@@ -14,3 +14,12 @@ button {
     border: solid 1px #ffffff;
     padding: 0.25em;
 }
+
+button:hover {
+    background-color: #303030;
+}
+
+button:active {
+    background-color: #000000;
+    border: solid 1px #808080;
+}

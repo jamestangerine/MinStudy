@@ -13,8 +13,8 @@
         <br><p>Coding Separators:</p>
         <table>
             <tr>
-                <td>Term-Def: <textarea rows="1" cols="5" placeholder="\t"></textarea></td>
-                <td style="padding-left:2em">Entry: <textarea rows="1" cols="5" placeholder="\n"></textarea></td>
+                <td>Term-Def: <textarea id="term-def" rows="1" cols="5" placeholder="\t"></textarea></td>
+                <td style="padding-left:2em">Entry: <textarea id="entry" rows="1" cols="5" placeholder="\n"></textarea></td>
             </tr>
         </table>
         <br>
@@ -24,9 +24,16 @@
         if ("serviceWorker" in navigator) {
             navigator.serviceWorker.register("sw.js");
         }
+        const input = document.getElementById("input");
+        const termDef = document.getElementById("term-def");
+        const entry = document.getElementById("entry");
         import Module from "./prog.js";
         Module().then((mod) => {
-
+            function startClick() {
+                const studyDat = input.value.split((entry.value.length > 0 ? entry.value : "\n")).map(e => e.split((termDef.value.length > 0 ? termDef.value : "\t")));
+                console.log(studyDat);
+            }
         });
+        document.getElementById("start").addEventListener("click", startClick);
     </script>
 </html>
