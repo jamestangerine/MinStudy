@@ -3,6 +3,13 @@ body {
     color: #ffffff;
 }
 
+.caption {
+    font-size: small;
+    text-align: center;
+    margin-top: 0.25em;
+    color: #808080;
+}
+
 textarea {
     background-color: #000000;
     color: #ffffff;

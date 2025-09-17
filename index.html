@@ -10,15 +10,20 @@
         <h1>Minimal Studier</h1>
         <p>Enter a study list.</p>
         <textarea id="input" rows="8" cols="50" placeholder="term&#9;definition&#10;term&#9;definition&#10;term&#9;definition&#10;..."></textarea>
-        <br><p>Coding Separators:</p>
+        <br><h3>Coding Separators:</h3>
         <table>
             <tr>
-                <td>Term-Def: <textarea id="term-def" rows="1" cols="5" placeholder="\t"></textarea></td>
-                <td style="padding-left:2em">Entry: <textarea id="entry" rows="1" cols="5" placeholder="\n"></textarea></td>
+                <td>
+                    Term-Def: <textarea id="term-def" rows="1" cols="5"></textarea>
+                    <br><p class="caption">Default: Tab</p>
+                </td>
+                <td style="padding-left:2em">
+                    Entry: <textarea id="entry" rows="1" cols="5"></textarea>
+                    <br><p class="caption">Default: Newline</p>
+                </td>
             </tr>
         </table>
-        <br>
-        <button id="start">Begin Studying</button>
+        <br><button id="start">Begin Studying</button>
     </body>
     <script type="module">
         if ("serviceWorker" in navigator) {
