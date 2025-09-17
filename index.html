@@ -33,7 +33,7 @@
                 const studyDat = input.value.split((entry.value.length > 0 ? entry.value : "\n")).map(e => e.split((termDef.value.length > 0 ? termDef.value : "\t")));
                 console.log(studyDat);
             }
+            document.getElementById("start").addEventListener("click", startClick);
         });
-        document.getElementById("start").addEventListener("click", startClick);
     </script>
 </html>
