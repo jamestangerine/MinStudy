@@ -39,15 +39,18 @@
         Module().then((mod) => {
             function startClick() {
                 const studyDat = input.value.split((entry.value.length > 0 ? entry.value : "\n")).map(e => e.split((termDef.value.length > 0 ? termDef.value : "\t")));
+                console.log(studyDat);
                 if (studyDat.length < 3) {
                     errParent.style.visibility = "visible";
                     error.innerText = "Please enter at least 3 terms.";
                 }
                 else {
                     for (let ct = 0; ct < studyDat.length; ct++) {
-                        if (studyDat[ct].length != 2) {
+                        let curr = studyDat[ct];
+                        let cl = curr.length;
+                        if (cl != 2) {
                             errParent.style.visibility = "visible";
-                            error.innerText = (ct == 0 ? ("Entry "+(ct+1).toString()+" is empty. Please make your entries have exactly 1 term and 1 definition.") : ("Entry "+(ct+1).toString()+" (\""+studyDat[ct][0].substr(0, 10)+" . . . \") is not formatted properly. Please make your entries have exactly 1 term and 1 definition."));
+                            error.innerText = ((cl == 1 && curr[0].length == 1) ? ("Entry "+(ct+1).toString()+" is empty. Please make your entries have exactly 1 term and 1 definition.") : ("Entry "+(ct+1).toString()+" (\""+curr[0].substr(0, 10)+" . . . \") is not formatted properly. Please make your entries have exactly 1 term and 1 definition."));
                             return;
                         }
                     }
