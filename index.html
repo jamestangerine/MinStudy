@@ -44,7 +44,13 @@
                     error.innerText = "Please enter at least 3 terms.";
                 }
                 else {
-
+                    for (let ct = 0; ct < studyDat.length; ct++) {
+                        if (studyDat[ct].length != 2) {
+                            errParent.style.visibility = "visible";
+                            error.innerText = (ct == 0 ? ("Entry "+(ct+1).toString()+" is empty. Please make your entries have exactly 1 term and 1 definition.") : ("Entry "+(ct+1).toString()+" (\""+studyDat[ct].substr(0, 10)+" . . . \") is not formatted properly. Please make your entries have exactly 1 term and 1 definition."));
+                            return;
+                        }
+                    }
                 }
             }
             document.getElementById("start").addEventListener("click", startClick);
