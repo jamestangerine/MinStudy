@@ -48,10 +48,36 @@
                     for (let ct = 0; ct < studyDat.length; ct++) {
                         let curr = studyDat[ct];
                         let cl = curr.length;
-                        if (cl != 2) {
-                            errParent.style.visibility = "visible";
-                            error.innerText = ((cl == 1 && curr[0].length == 1) ? ("Entry "+(ct+1).toString()+" is empty. Please make your entries have exactly 1 term and 1 definition.") : ("Entry "+(ct+1).toString()+" (\""+curr[0].substr(0, 10)+" . . . \") is not formatted properly. Please make your entries have exactly 1 term and 1 definition."));
-                            return;
+                        if (cl == 2) {
+                            if (curr[0].length == 0) {
+                                errParent.style.visibility = "visible";
+                                error.innerText = "Entry "+(ct+1).toString()+" (\" . . . "+curr[1]+" . . . \") is missing a term. Please ensure all entries have a term.";
+                                return;
+                            } else if (curr[1].length == 0) {
+                                errParent.style.visibility = "visible";
+                                error.innerText = "Entry "+(ct+1).toString()+" (\""+curr[0]+" . . . \") is missing a definition. Please ensure all entries have a definition.";
+                                return;
+                            }
+                        } else if (cl == 1) {
+                            if (curr[0].length == 0) {
+                                errParent.style.visibility = "visible";
+                                error.innerText = "Entry "+(ct+1).toString()+" is empty. Please ensure all entries have a term and definition.";
+                                return;
+                            } else {
+                                errParent.style.visibility = "visible";
+                                error.innerText = "Entry "+(ct+1).toString()+" (\""+curr[0]+" . . . \") is missing a term or definition. Please ensure all entries have a term and definition.";
+                                return;
+                            }
+                        } else {
+                            if (curr[0].length == 0) {
+                                errParent.style.visibility = "visible";
+                                error.innerText = "Entry "+(ct+1).toString()+" is improperly formatted. Please ensure all entries have exactly one term and one definition.";
+                                return;
+                            } else {
+                                errParent.style.visibility = "visible";
+                                error.innerText = "Entry "+(ct+1).toString()+" (\""+curr[0]+" . . . \") is improperly formatted. Please ensure all entries have exactly one term and one definition.";
+                                return;
+                            }
                         }
                     }
                 }
