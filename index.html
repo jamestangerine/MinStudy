@@ -39,12 +39,16 @@
         Module().then((mod) => {
             function startClick() {
                 const studyDat = input.value.split((entry.value.length > 0 ? entry.value : "\n")).map(e => e.split((termDef.value.length > 0 ? termDef.value : "\t")));
-                if (studyDat.length < 3) {
+                let sdl = studyDat.length;
+                if (sdl < 3) {
                     errParent.style.visibility = "visible";
                     error.innerText = "Please enter at least 3 terms.";
                 }
+                else if (sdl > 2500) {
+                    errParent.style.visibility = "visible";
+                    error.innerText = "You have entered "+sdl.toString()+" terms, exceeding the limit of 2500. Please enter no more than 2500 terms.";
+                }
                 else {
-                    let sdl = studyDat.length;
                     for (let ct = 0; ct < sdl; ct++) {
                         let curr = studyDat[ct];
                         let cl = curr.length;
@@ -86,9 +90,9 @@
                             }
                         }
                     }
-                    const randPtr = mod._malloc(sdl*4);
-                    mod._shuffle(randPtr, sdl);
-                    const resTest = mod.HEAPU16[randPtr>>1];
+                    const randPtr = mod._malloc(sdl*2);
+                    mod._w_shuffle(randPtr, sdl);
+                    const resTest = mod.HEAPU16.subarray(randPtr>>1, (randPtr>>1)+sdl);
                     console.log(resTest);
                     mod._free(randPtr);
                 }
