@@ -90,11 +90,20 @@
                             }
                         }
                     }
-                    const randPtr = mod._malloc(sdl*2);
-                    mod._w_shuffle(randPtr, sdl);
-                    const resTest = mod.HEAPU16.subarray(randPtr>>1, (randPtr>>1)+sdl);
-                    console.log(resTest);
-                    mod._free(randPtr);
+                    errParent.style.visibility = "hidden";
+                    if (sdl <= 256) {
+                        const randPtr = mod._malloc(sdl);
+                        mod._b_shuffle(randPtr, sdl);
+                        const resTest = mod.HEAPU8.subarray(randPtr, randPtr+sdl);
+                        console.log(resTest);
+                        mod._free(randPtr);
+                    } else {
+                        const randPtr = mod._malloc(sdl*2);
+                        mod._w_shuffle(randPtr, sdl);
+                        const resTest = mod.HEAPU16.subarray(randPtr>>1, (randPtr>>1)+sdl);
+                        console.log(resTest);
+                        mod._free(randPtr);
+                    }
                 }
             }
             document.getElementById("start").addEventListener("click", startClick);
