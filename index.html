@@ -7,28 +7,33 @@
         <link rel="stylesheet" href="site.css">
     </head>
     <body>
-        <h1>Minimal Studier</h1>
-        <div class="centered">
-            <p>Enter a study list with 3 to 2500 term-definition pairs.</p>
-            <textarea id="input" rows="8" cols="50" placeholder="term&#9;definition&#10;term&#9;definition&#10;term&#9;definition&#10;..."></textarea>
-        </div>
-        <br><h3>Coding Separators:</h3>
-        <table>
-            <tr>
-                <td>
-                    Term-Def: <textarea id="term-def" rows="1" cols="5"></textarea>
-                    <br><p class="caption">Default: Tab</p>
-                </td>
-                <td style="padding-left:2em">
-                    Entry: <textarea id="entry" rows="1" cols="5"></textarea>
-                    <br><p class="caption">Default: Newline</p>
-                </td>
-            </tr>
-        </table>
-        <br><button id="start">Begin Studying</button>
-        <div class="centered"></div>
-            <p style="visibility: hidden"><b style="color: #ff0000">Error:</b> <span id="error-message"></span></p>
-        </div>
+        <section id="init" style="display: block">
+            <h1>Minimal Studier</h1>
+            <div class="centered">
+                <p>Enter a study list with 3 to 2500 term-definition pairs.</p>
+                <textarea id="input" rows="8" cols="50" placeholder="term&#9;definition&#10;term&#9;definition&#10;term&#9;definition&#10;..."></textarea>
+            </div>
+            <br><h3>Coding Separators:</h3>
+            <table>
+                <tr>
+                    <td>
+                        Term-Def: <textarea id="term-def" rows="1" cols="5"></textarea>
+                        <br><p class="caption">Default: Tab</p>
+                    </td>
+                    <td style="padding-left:2em">
+                        Entry: <textarea id="entry" rows="1" cols="5"></textarea>
+                        <br><p class="caption">Default: Newline</p>
+                    </td>
+                </tr>
+            </table>
+            <br><button id="start">Begin Studying</button>
+            <div class="centered"></div>
+                <p style="visibility: hidden"><b style="color: #ff0000">Error:</b> <span id="error-message"></span></p>
+            </div>
+        </section>
+        <section id="entry" style="display: none;">
+            
+        </section>
     </body>
     <script type="module">
         if ("serviceWorker" in navigator) {
@@ -39,6 +44,7 @@
         const entry = document.getElementById("entry");
         const error = document.getElementById("error-message");
         const errParent = error.parentElement;
+        const initBody = document.getElementById("init");
         import Module from "./prog.js";
         Module().then((mod) => {
             function startClick() {
@@ -94,12 +100,13 @@
                             }
                         }
                     }
-                    errParent.style.visibility = "hidden";
+                    //errParent.style.visibility = "hidden";
                     if (sdl <= 256) {
                         const randPtr = mod._malloc(sdl);
                         mod._b_shuffle(randPtr, sdl);
                         const resTest = mod.HEAPU8.subarray(randPtr, randPtr+sdl);
                         console.log(resTest);
+                        console.log(randPtr >> 1);
                         mod._free(randPtr);
                     } else {
                         const randPtr = mod._malloc(sdl*2);
