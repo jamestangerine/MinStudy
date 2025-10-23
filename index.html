@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="site.css">
     </head>
     <body>
-        <section id="init" style="display: block">
+        <section id="initBody" style="display: none">
             <h1>Minimal Studier</h1>
             <div class="centered">
                 <p>Enter a study list with 3 to 2500 term-definition pairs.</p>
@@ -31,8 +31,13 @@
                 <p style="visibility: hidden"><b style="color: #ff0000">Error:</b> <span id="error-message"></span></p>
             </div>
         </section>
-        <section id="entry" style="display: none;">
-            
+        <section id="entryBody" style="display: block">
+            <h1>Written Quiz</h1>
+            <div class="centered">
+                <p><b>Term:</b> <span id="ques"></span></p>
+                <textarea id="ans" rows="1" cols="50" placeholder="Enter definition"></textarea>
+            </div>
+            <br><button id="start">Submit</button>
         </section>
     </body>
     <script type="module">
@@ -44,9 +49,33 @@
         const entry = document.getElementById("entry");
         const error = document.getElementById("error-message");
         const errParent = error.parentElement;
-        const initBody = document.getElementById("init");
+        const initBody = document.getElementById("initBody");
+        const entryBody = document.getElementById("entryBody");
+        const ques = document.getElementById("ques");
+        const ans = document.getElementById("ans");
         import Module from "./prog.js";
         Module().then((mod) => {
+            let randPtr;
+            let iPtr;
+            let dPtr;
+            let endPtr;
+            let repCtr = 0;
+            let currentPair;
+            function uint8handler() {
+                if (ans.value == currentPair[0]) {
+
+                }
+                
+                if (iPtr == endPtr) {
+                    //handle
+                }
+                iPtr++;
+                currentPair = studyDat[mod.HEAPU8[randPtr]];
+                ques.innerText = currentPair[1];
+            }
+            function uint16handler() {
+
+            }
             function startClick() {
                 const studyDat = input.value.split((entry.value.length > 0 ? entry.value : "\n")).map(e => e.split((termDef.value.length > 0 ? termDef.value : "\t")));
                 let sdl = studyDat.length;
@@ -101,20 +130,37 @@
                         }
                     }
                     //errParent.style.visibility = "hidden";
-                    if (sdl <= 256) {
-                        const randPtr = mod._malloc(sdl);
+                    if (sdl < 256) {
+                        randPtr = mod._malloc(sdl);
                         mod._b_shuffle(randPtr, sdl);
-                        const resTest = mod.HEAPU8.subarray(randPtr, randPtr+sdl);
-                        console.log(resTest);
-                        console.log(randPtr >> 1);
-                        mod._free(randPtr);
+                        iPtr = randPtr;
+                        dPtr = randPtr;
+                        endPtr = randPtr + sdl - 1;
+                        currentPair = studyDat[mod.HEAPU8[randPtr]];
+                        ques.innerText = currentPair[1];
+                        ans.addEventListener("keydown", uint8handler);
+                        //const resTest = mod.HEAPU8.subarray(randPtr, randPtr+sdl);
+                        /*let ct = 0;
+                        for (let n = randPtr; n < randPtr + sdl; n++) {
+                            console.log(mod.HEAPU8[n]);
+                        }*/
+                        //mod._free(randPtr);
                     } else {
-                        const randPtr = mod._malloc(sdl*2);
+                        randPtr = mod._malloc(sdl<<1);
                         mod._w_shuffle(randPtr, sdl);
-                        const resTest = mod.HEAPU16.subarray(randPtr>>1, (randPtr>>1)+sdl);
-                        console.log(resTest);
-                        mod._free(randPtr);
+                        iPtr = (randPtr >> 1);
+                        dPtr = randPtr;
+                        endPtr = randPtr + sdl - 1;
+                        currentPair = studyDat[mod.HEAPU16[randPtr]];
+                        ques.innerText = currentPair[1];
+                        ans.addEventListener("keydown", uint16handler);
+                        /*for (let n = randPtr >> 1; n < (randPtr >> 1) + sdl; n++) {
+                            console.log(mod.HEAPU16[n]);
+                        }*/
+                        //mod._free(randPtr);
                     }
+                    initBody.style.display = "none";
+                    entryBody.style.display = "block";
                 }
             }
             document.getElementById("start").addEventListener("click", startClick);

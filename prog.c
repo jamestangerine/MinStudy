@@ -12,7 +12,7 @@ void b_shuffle (uint8_t* ptr, uint8_t length) {
     }
     uint8_t j = length-1;
     srand(time(NULL));
-    uint8_t r = (uint8_t)(rand() % (j+1));
+    uint8_t r = (uint8_t)(rand() % length);
     *(ptr-r) = j;
     *ptr = j-r;
     while (j > 2) {
@@ -40,7 +40,7 @@ void w_shuffle (uint16_t* ptr, uint16_t length) {
     }
     uint16_t j = length-1;
     srand(time(NULL));
-    uint16_t r = (uint16_t)(rand() % (j+1));
+    uint16_t r = (uint16_t)(rand() % length);
     *(ptr-r) = j;
     *ptr = j-r;
     while (j > 2) {
