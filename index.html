@@ -27,9 +27,7 @@
                 </tr>
             </table>
             <br><button id="start">Begin Studying</button>
-            <div class="centered"></div>
-                <p style="visibility: hidden"><b style="color: #ff0000">Error:</b> <span id="error-message"></span></p>
-            </div>
+            <p style="visibility: hidden; text-align: center;"><b class="err">Error:</b> <span id="error-message"></span></p>
         </section>
         <section id="entryBody" style="display: block">
             <h1>Written Quiz</h1>
@@ -37,7 +35,11 @@
                 <p><b>Term:</b> <span id="ques"></span></p>
                 <textarea id="ans" rows="1" cols="50" placeholder="Enter definition"></textarea>
             </div>
-            <br><button id="start">Submit</button>
+            <br><br><button id="start">Submit</button><br><br>
+            <div id="incorrectDisplay" style="display: inline-block;">
+                <p class="text-align: center;"><b class="err">Incorrect</b> | Correct answer: <span id="correct-ans"></span></p>
+                <button id="review">Add to Review List</button>&#9;<button id="skip">Skip to Next Term</button>
+            </div>
         </section>
     </body>
     <script type="module">
@@ -53,6 +55,9 @@
         const entryBody = document.getElementById("entryBody");
         const ques = document.getElementById("ques");
         const ans = document.getElementById("ans");
+        const incorrectDisplay = document.getElementById("incorrectDisplay");
+        const review = document.getElementById("review");
+        const skip = document.getElementById("skip");
         import Module from "./prog.js";
         Module().then((mod) => {
             let randPtr;
@@ -63,15 +68,16 @@
             let currentPair;
             function uint8handler() {
                 if (ans.value == currentPair[0]) {
-
+                    if (iPtr == endPtr) {
+                        //handle
+                    }
+                    iPtr++;
+                    currentPair = studyDat[mod.HEAPU8[randPtr]];
+                    ques.innerText = currentPair[1];
+                    ans.value = "";
+                } else {
+                    
                 }
-                
-                if (iPtr == endPtr) {
-                    //handle
-                }
-                iPtr++;
-                currentPair = studyDat[mod.HEAPU8[randPtr]];
-                ques.innerText = currentPair[1];
             }
             function uint16handler() {
 

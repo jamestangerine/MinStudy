@@ -23,6 +23,10 @@ table {
     color: #808080;
 }
 
+.err {
+    color: #ff0000;
+}
+
 textarea {
     background-color: #000000;
     color: #ffffff;
