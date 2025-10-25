@@ -38,7 +38,7 @@
             <br><br><button id="submit">Submit</button><br><br>
             <div id="incorrectDisplay" style="display: none;">
                 <p class="text-align: center;"><b class="err">Incorrect</b> | Correct answer: <span id="correctAns"></span></p>
-                <br><button id="review">Add to Review List</button>&#9;<button id="skip">Skip to Next Term</button>
+                <button id="review">Add to Review List</button>&#9;<button id="skip">Skip to Next Term</button>
             </div>
         </section>
     </body>
@@ -129,6 +129,7 @@
                         ques.innerText = currentPair[1];
                         ans.addEventListener("keydown", (key) => {
                             if (!interrupt && key.key == "Enter") {
+                                key.preventDefault();
                                 if (ans.value == currentPair[0]) {
                                     if (iPtr == endPtr) {
                                         // handle
