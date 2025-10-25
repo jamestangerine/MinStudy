@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="site.css">
     </head>
     <body>
-        <section id="initBody" style="display: none">
+        <section id="initBody" style="display: block">
             <h1>Minimal Studier</h1>
             <div class="centered">
                 <p>Enter a study list with 3 to 2500 term-definition pairs.</p>
@@ -29,13 +29,12 @@
             <br><button id="start">Begin Studying</button>
             <p style="visibility: hidden; text-align: center;"><b class="err">Error:</b> <span id="error-message"></span></p>
         </section>
-        <section id="entryBody" style="display: block">
+        <section id="entryBody" style="display: none">
             <h1>Written Quiz</h1>
             <div class="centered">
                 <p><b>Term:</b> <span id="ques"></span></p>
-                <textarea id="ans" rows="1" cols="50" placeholder="Enter definition"></textarea>
+                <textarea id="ans" rows="1" cols="50" placeholder="Enter definition"></textarea> <button id="submit">Submit</button>
             </div>
-            <br><br><button id="start">Submit</button><br><br>
             <div id="incorrectDisplay" style="display: inline-block;">
                 <p class="text-align: center;"><b class="err">Incorrect</b> | Correct answer: <span id="correct-ans"></span></p>
                 <button id="review">Add to Review List</button>&#9;<button id="skip">Skip to Next Term</button>
@@ -56,33 +55,12 @@
         const ques = document.getElementById("ques");
         const ans = document.getElementById("ans");
         const incorrectDisplay = document.getElementById("incorrectDisplay");
+        const correctAns = document.getElementById("correctAns");
         const review = document.getElementById("review");
         const skip = document.getElementById("skip");
         import Module from "./prog.js";
         Module().then((mod) => {
-            let randPtr;
-            let iPtr;
-            let dPtr;
-            let endPtr;
-            let repCtr = 0;
-            let currentPair;
-            function uint8handler() {
-                if (ans.value == currentPair[0]) {
-                    if (iPtr == endPtr) {
-                        //handle
-                    }
-                    iPtr++;
-                    currentPair = studyDat[mod.HEAPU8[randPtr]];
-                    ques.innerText = currentPair[1];
-                    ans.value = "";
-                } else {
-                    
-                }
-            }
-            function uint16handler() {
-
-            }
-            function startClick() {
+            document.getElementById("start").addEventListener("click", () => {
                 const studyDat = input.value.split((entry.value.length > 0 ? entry.value : "\n")).map(e => e.split((termDef.value.length > 0 ? termDef.value : "\t")));
                 let sdl = studyDat.length;
                 if (sdl < 3) {
@@ -135,16 +113,39 @@
                             }
                         }
                     }
-                    //errParent.style.visibility = "hidden";
+                    errParent.style.visibility = "hidden";
+                    initBody.style.display = "none";
+                    entryBody.style.display = "block";
                     if (sdl < 256) {
-                        randPtr = mod._malloc(sdl);
+                        let randPtr = mod._malloc(sdl);
                         mod._b_shuffle(randPtr, sdl);
-                        iPtr = randPtr;
-                        dPtr = randPtr;
-                        endPtr = randPtr + sdl - 1;
-                        currentPair = studyDat[mod.HEAPU8[randPtr]];
+                        let iPtr = randPtr;
+                        let dPtr = randPtr;
+                        let endPtr = randPtr + sdl - 1;
+                        let repCtr = 0;
+                        let currentPair = studyDat[mod.HEAPU8[randPtr]];
+                        let interrupt = false;
                         ques.innerText = currentPair[1];
-                        ans.addEventListener("keydown", uint8handler);
+                        ans.addEventListener("keydown", (key) => {
+                            if (!interrupt && key.key == "Enter") {
+                                if (ans.value == currentPair[0]) {
+                                    if (iPtr == endPtr) {
+                                        // handle
+                                        console.log("Finished");
+                                        return;
+                                    }
+                                    iPtr++;
+                                    currentPair = studyDat[mod.HEAPU8[randPtr]];
+                                    ques.innerText = currentPair[1];
+                                    ans.value = "";
+                                } else {
+                                    interrupt = true;
+                                    ans.readOnly = true;
+                                    incorrectDisplay.style.display = "inline-block";
+                                    correctAns.innerText = currentPair[0];
+                                }
+                            }
+                        });
                         //const resTest = mod.HEAPU8.subarray(randPtr, randPtr+sdl);
                         /*let ct = 0;
                         for (let n = randPtr; n < randPtr + sdl; n++) {
@@ -168,8 +169,7 @@
                     initBody.style.display = "none";
                     entryBody.style.display = "block";
                 }
-            }
-            document.getElementById("start").addEventListener("click", startClick);
+            });
         });
     </script>
 </html>
