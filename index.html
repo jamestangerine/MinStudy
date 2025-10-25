@@ -35,7 +35,7 @@
                 <p><b>Term:</b> <span id="ques"></span></p>
                 <textarea id="ans" rows="1" cols="50" placeholder="Enter definition"></textarea> <button id="submit">Submit</button>
             </div>
-            <div id="incorrectDisplay" style="display: inline-block;">
+            <div id="incorrectDisplay" style="display: none;">
                 <p class="text-align: center;"><b class="err">Incorrect</b> | Correct answer: <span id="correct-ans"></span></p>
                 <button id="review">Add to Review List</button>&#9;<button id="skip">Skip to Next Term</button>
             </div>
@@ -135,7 +135,7 @@
                                         return;
                                     }
                                     iPtr++;
-                                    currentPair = studyDat[mod.HEAPU8[randPtr]];
+                                    currentPair = studyDat[mod.HEAPU8[iPtr]];
                                     ques.innerText = currentPair[1];
                                     ans.value = "";
                                 } else {
