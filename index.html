@@ -58,6 +58,7 @@
         const incorrectDisplay = document.getElementById("incorrectDisplay");
         const correctAns = document.getElementById("correctAns");
         const review = document.getElementById("review");
+        const prereview = document.getElementById("prereview");
         const skip = document.getElementById("skip");
         import Module from "./prog.js";
         Module().then((mod) => {
@@ -148,7 +149,7 @@
                             }
                         });
                         review.addEventListener("click", () => {
-                            studyDat[dPtr] = mod.HEAPU8[iPtr];
+                            mod.HEAPU8[dPtr] = mod.HEAPU8[iPtr];
                             dPtr++;
                             if (iPtr == endPtr) {
                                 // handle
@@ -214,7 +215,7 @@
                             }
                         });
                         review.addEventListener("click", () => {
-                            studyDat[dPtr] = mod.HEAPU16[iPtr];
+                            mod.HEAPU16[dPtr] = mod.HEAPU16[iPtr];
                             dPtr++;
                             if (iPtr == endPtr) {
                                 // handle
