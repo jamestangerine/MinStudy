@@ -35,7 +35,7 @@
                 <p><b>Term:</b> <span id="ques"></span></p><br>
                 <textarea id="ans" rows="1" cols="50" placeholder="Enter definition"></textarea>
             </div>
-            <br><br><button id="submit">Submit</button><br><br>
+            <br><br><button id="submit">Submit</button><button id="prereview">Pre-Add to Review List</button><br><br>
             <div id="incorrectDisplay" style="display: none;">
                 <p class="text-align: center;"><b class="err">Incorrect</b> | Correct answer: <span id="correctAns"></span></p>
                 <button id="review">Add to Review List</button>&#9;<button id="skip">Skip to Next Term</button>
@@ -123,7 +123,6 @@
                         let iPtr = randPtr;
                         let dPtr = randPtr;
                         let endPtr = randPtr + sdl - 1;
-                        let repCtr = 0;
                         let currentPair = studyDat[mod.HEAPU8[randPtr]];
                         let interrupt = false;
                         ques.innerText = currentPair[1];
@@ -148,6 +147,36 @@
                                 }
                             }
                         });
+                        review.addEventListener("click", () => {
+                            studyDat[dPtr] = mod.HEAPU8[iPtr];
+                            dPtr++;
+                            if (iPtr == endPtr) {
+                                // handle
+                                console.log("Finished");
+                                return;
+                            }
+                            incorrectDisplay.style.display = "none";
+                            iPtr++;
+                            currentPair = studyDat[mod.HEAPU8[iPtr]];
+                            ques.innerText = currentPair[1];
+                            ans.value = "";
+                            ans.readOnly = true;
+                            interrupt = false;
+                        });
+                        skip.addEventListener("click", () => {
+                            if (iPtr == endPtr) {
+                                // handle
+                                console.log("Finished");
+                                return;
+                            }
+                            incorrectDisplay.style.display = "none";
+                            iPtr++;
+                            currentPair = studyDat[mod.HEAPU8[iPtr]];
+                            ques.innerText = currentPair[1];
+                            ans.value = "";
+                            ans.readOnly = true;
+                            interrupt = false;
+                        });
                         //const resTest = mod.HEAPU8.subarray(randPtr, randPtr+sdl);
                         /*let ct = 0;
                         for (let n = randPtr; n < randPtr + sdl; n++) {
@@ -155,14 +184,65 @@
                         }*/
                         //mod._free(randPtr);
                     } else {
-                        randPtr = mod._malloc(sdl<<1);
+                        let randPtr = mod._malloc(sdl<<1);
                         mod._w_shuffle(randPtr, sdl);
-                        iPtr = (randPtr >> 1);
-                        dPtr = randPtr;
-                        endPtr = randPtr + sdl - 1;
-                        currentPair = studyDat[mod.HEAPU16[randPtr]];
+                        let iPtr = (randPtr >> 1);
+                        let dPtr = iPtr;
+                        let endPtr = randPtr + sdl - 1;
+                        let currentPair = studyDat[mod.HEAPU16[iPtr]];
+                        let interrupt = false;
                         ques.innerText = currentPair[1];
-                        ans.addEventListener("keydown", uint16handler);
+                        ans.addEventListener("keydown", (key) => {
+                            if (!interrupt && key.key == "Enter") {
+                                key.preventDefault();
+                                if (ans.value == currentPair[0]) {
+                                    if (iPtr == endPtr) {
+                                        // handle
+                                        console.log("Finished");
+                                        return;
+                                    }
+                                    iPtr++;
+                                    currentPair = studyDat[mod.HEAPU16[iPtr]];
+                                    ques.innerText = currentPair[1];
+                                    ans.value = "";
+                                } else {
+                                    interrupt = true;
+                                    ans.readOnly = true;
+                                    incorrectDisplay.style.display = "inline-block";
+                                    correctAns.innerText = currentPair[0];
+                                }
+                            }
+                        });
+                        review.addEventListener("click", () => {
+                            studyDat[dPtr] = mod.HEAPU16[iPtr];
+                            dPtr++;
+                            if (iPtr == endPtr) {
+                                // handle
+                                console.log("Finished");
+                                return;
+                            }
+                            incorrectDisplay.style.display = "none";
+                            iPtr++;
+                            currentPair = studyDat[mod.HEAPU16[iPtr]];
+                            ques.innerText = currentPair[1];
+                            ans.value = "";
+                            ans.readOnly = true;
+                            interrupt = false;
+                        });
+                        skip.addEventListener("click", () => {
+                            if (iPtr == endPtr) {
+                                // handle
+                                console.log("Finished");
+                                return;
+                            }
+                            incorrectDisplay.style.display = "none";
+                            iPtr++;
+                            currentPair = studyDat[mod.HEAPU16[iPtr]];
+                            ques.innerText = currentPair[1];
+                            ans.value = "";
+                            ans.readOnly = true;
+                            interrupt = false;
+                        });
                         /*for (let n = randPtr >> 1; n < (randPtr >> 1) + sdl; n++) {
                             console.log(mod.HEAPU16[n]);
                         }*/
