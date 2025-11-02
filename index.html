@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="site.css">
     </head>
     <body>
-        <section id="initBody" style="display: block">
+        <section id="initBody" style="display: none">
             <h1>Minimal Studier</h1>
             <div class="centered">
                 <p>Enter a study list with 3 to 2500 term-definition pairs.</p>
@@ -30,10 +30,10 @@
             <p style="visibility: hidden; text-align: center;"><b class="err">Error:</b> <span id="error-message"></span></p>
         </section>
         <section id="entryBody" style="display: none">
-            <h1>Written Quiz</h1>
+            <h1>Quiz</h1>
             <div class="centered">
-                <p><b>Term:</b> <span id="ques"></span></p><br>
-                <textarea id="ans" rows="1" cols="50" placeholder="Enter definition"></textarea>
+                <p><b>Definition:</b> <span id="ques"></span></p><br>
+                <textarea id="ans" rows="1" cols="50" placeholder="Enter the correct term"></textarea>
             </div>
             <br><br><table>
                 <tr>
@@ -50,6 +50,17 @@
                     </tr>
                 </table>
             </div>
+        </section>
+        <section id="resultsBody" style="display: block">
+            <h1>Results</h1>
+            <textarea id="results" rows="8" cols="50" readonly></textarea><br>
+            <p class="caption">This text area is read-only, but you can resize it.</p>
+            <table>
+                <tr>
+                    <td><button id="next">Next Round</button></td>
+                    <td style="padding-left:1em"><button id="homescreen">Return to Home</button></td>
+                </tr>
+            </table>
         </section>
     </body>
     <script type="module">
