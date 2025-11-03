@@ -54,10 +54,10 @@
         <section id="resultsBody" style="display: block">
             <h1>Results</h1>
             <textarea id="results" rows="8" cols="50" readonly></textarea><br>
-            <p class="caption">This text area is read-only, but you can resize it.</p>
+            <p class="caption">These are the questions you missed. This text area is read-only, but you can resize it.</p>
             <table>
                 <tr>
-                    <td><button id="next">Next Round</button></td>
+                    <td><button id="next">Study Missed Items</button></td>
                     <td style="padding-left:1em"><button id="homescreen">Return to Home</button></td>
                 </tr>
             </table>
@@ -74,6 +74,7 @@
         const errParent = error.parentElement;
         const initBody = document.getElementById("initBody");
         const entryBody = document.getElementById("entryBody");
+        const resultsBody = document.getElementById("resultsBody");
         const ques = document.getElementById("ques");
         const ans = document.getElementById("ans");
         const incorrectDisplay = document.getElementById("incorrectDisplay");
@@ -82,11 +83,18 @@
         const prereview = document.getElementById("prereview");
         const skip = document.getElementById("skip");
         const submit = document.getElementById("submit");
+        const results = document.getElementById("results");
+        const next = document.getElementById("next");
+        const homescreen = document.getElementById("homescreen");
         import Module from "./prog.js";
         Module().then((mod) => {
             document.getElementById("start").addEventListener("click", () => {
-                const studyDat = input.value.split((entry.value.length > 0 ? entry.value : "\n")).map(e => e.split((termDef.value.length > 0 ? termDef.value : "\t")));
+                const gSeparator = (entry.value.length > 0 ? entry.value : "\n");
+                const lSeparator = (termDef.value.length > 0 ? termDef.value : "\t");
+                const studyDat = input.value.split(gSeparator).map(e => e.split(lSeparator));
                 let sdl = studyDat.length;
+                let processorFunction;
+                let cancelFunction;
                 if (sdl < 3) {
                     errParent.style.visibility = "visible";
                     error.innerText = "Please enter at least 3 terms.";
@@ -143,197 +151,210 @@
                     if (sdl < 256) {
                         let randPtr = mod._malloc(sdl);
                         mod._b_shuffle(randPtr, sdl);
-                        let iPtr = randPtr;
-                        let dPtr = randPtr;
-                        let endPtr = randPtr + sdl - 1;
-                        let currentPair = studyDat[mod.HEAPU8[randPtr]];
-                        let interrupt = false;
-                        let padd = false;
-                        ques.innerText = currentPair[1];
-                        prereview.addEventListener("click", () => {
-                            if (!padd) {
-                                mod.HEAPU8[dPtr] = mod.HEAPU8[iPtr];
-                                dPtr++;
-                                padd = true;
-                            }
-                        });
-                        submit.addEventListener("click", () => {
-                            if (!interrupt) {
-                                if (ans.value == currentPair[0]) {
-                                    if (iPtr == endPtr) {
-                                        // handle
-                                        console.log("Finished");
-                                        return;
-                                    }
-                                    iPtr++;
-                                    currentPair = studyDat[mod.HEAPU8[iPtr]];
-                                    ques.innerText = currentPair[1];
-                                    ans.value = "";
-                                } else {
-                                    interrupt = true;
-                                    ans.readOnly = true;
-                                    incorrectDisplay.style.display = "inline-block";
-                                    correctAns.innerText = currentPair[0];
-                                }
-                            }
-                        });
-                        ans.addEventListener("keydown", (key) => {
-                            if (!interrupt && key.key == "Enter") {
-                                key.preventDefault();
-                                if (ans.value == currentPair[0]) {
-                                    if (iPtr == endPtr) {
-                                        // handle
-                                        console.log("Finished");
-                                        return;
-                                    }
-                                    iPtr++;
-                                    currentPair = studyDat[mod.HEAPU8[iPtr]];
-                                    ques.innerText = currentPair[1];
-                                    ans.value = "";
-                                } else {
-                                    interrupt = true;
-                                    ans.readOnly = true;
-                                    incorrectDisplay.style.display = "inline-block";
-                                    correctAns.innerText = currentPair[0];
-                                }
-                            }
-                        });
-                        review.addEventListener("click", () => {
-                            if (!padd) {
-                                mod.HEAPU8[dPtr] = mod.HEAPU8[iPtr];
-                                dPtr++;
-                            }
-                            if (iPtr == endPtr) {
-                                // handle
-                                console.log("Finished");
-                                return;
-                            }
-                            incorrectDisplay.style.display = "none";
-                            iPtr++;
-                            currentPair = studyDat[mod.HEAPU8[iPtr]];
+                        let modRequired = true;
+                        processorFunction = () => {
+                            let iPtr = randPtr;
+                            let dPtr = randPtr;
+                            let endPtr = randPtr + sdl - 1;
+                            let currentPair = studyDat[mod.HEAPU8[randPtr]];
+                            let interrupt = false;
+                            let padd = false;
                             ques.innerText = currentPair[1];
-                            ans.value = "";
-                            ans.readOnly = false;
-                            padd = false;
-                            interrupt = false;
-                        });
-                        skip.addEventListener("click", () => {
-                            if (iPtr == endPtr) {
-                                // handle
-                                console.log("Finished");
-                                return;
-                            }
-                            incorrectDisplay.style.display = "none";
-                            iPtr++;
-                            currentPair = studyDat[mod.HEAPU8[iPtr]];
-                            ques.innerText = currentPair[1];
-                            ans.value = "";
-                            ans.readOnly = false;
-                            padd = false;
-                            interrupt = false;
-                        });
-                        //const resTest = mod.HEAPU8.subarray(randPtr, randPtr+sdl);
-                        /*let ct = 0;
-                        for (let n = randPtr; n < randPtr + sdl; n++) {
-                            console.log(mod.HEAPU8[n]);
-                        }*/
-                        //mod._free(randPtr);
+                            prereview.addEventListener("click", () => {
+                                if (!padd) {
+                                    mod.HEAPU8[dPtr] = mod.HEAPU8[iPtr];
+                                    dPtr++;
+                                    padd = true;
+                                }
+                            });
+                            submit.addEventListener("click", () => {
+                                if (!interrupt) {
+                                    if (ans.value == currentPair[0]) {
+                                        if (iPtr == endPtr) {
+                                            let resPtr = randPtr;
+                                            sdl = dPtr - resPtr;
+                                            if (sdl != 0) {
+                                                entryBody.style.display = "none";
+                                                resultsBody.style.display = "block";
+                                                currentPair = studyDat[mod.HEAPU8[resPtr]];
+                                                let accumulator = currentPair[0]+lSeparator+currentPair[1];
+                                                while (resPtr < dPtr) {
+                                                    resPtr++;
+                                                    currentPair = studyDat[mod.HEAPU8[resPtr]];
+                                                    accumulator += gSeparator+currentPair[0]+lSeparator+currentPair[1];
+                                                }
+                                                results.value = accumulator;
+                                                if (modRequired) {
+                                                    next.addEventListener("click", processorFunction());
+                                                    modRequired = false;
+                                                }
+                                            } else {
+
+                                            }
+                                            return;
+                                        }
+                                        iPtr++;
+                                        currentPair = studyDat[mod.HEAPU8[iPtr]];
+                                        ques.innerText = currentPair[1];
+                                        ans.value = "";
+                                    } else {
+                                        interrupt = true;
+                                        ans.readOnly = true;
+                                        incorrectDisplay.style.display = "inline-block";
+                                        correctAns.innerText = currentPair[0];
+                                    }
+                                }
+                            });
+                            ans.addEventListener("keydown", (key) => {
+                                if (!interrupt && key.key == "Enter") {
+                                    key.preventDefault();
+                                    if (ans.value == currentPair[0]) {
+                                        if (iPtr == endPtr) {
+                                            // handle
+                                            console.log("Finished");
+                                            return;
+                                        }
+                                        iPtr++;
+                                        currentPair = studyDat[mod.HEAPU8[iPtr]];
+                                        ques.innerText = currentPair[1];
+                                        ans.value = "";
+                                    } else {
+                                        interrupt = true;
+                                        ans.readOnly = true;
+                                        incorrectDisplay.style.display = "inline-block";
+                                        correctAns.innerText = currentPair[0];
+                                    }
+                                }
+                            });
+                            review.addEventListener("click", () => {
+                                if (!padd) {
+                                    mod.HEAPU8[dPtr] = mod.HEAPU8[iPtr];
+                                    dPtr++;
+                                }
+                                if (iPtr == endPtr) {
+                                    // handle
+                                    console.log("Finished");
+                                    return;
+                                }
+                                incorrectDisplay.style.display = "none";
+                                iPtr++;
+                                currentPair = studyDat[mod.HEAPU8[iPtr]];
+                                ques.innerText = currentPair[1];
+                                ans.value = "";
+                                ans.readOnly = false;
+                                padd = false;
+                                interrupt = false;
+                            });
+                            skip.addEventListener("click", () => {
+                                if (iPtr == endPtr) {
+                                    // handle
+                                    console.log("Finished");
+                                    return;
+                                }
+                                incorrectDisplay.style.display = "none";
+                                iPtr++;
+                                currentPair = studyDat[mod.HEAPU8[iPtr]];
+                                ques.innerText = currentPair[1];
+                                ans.value = "";
+                                ans.readOnly = false;
+                                padd = false;
+                                interrupt = false;
+                            });
+                        }
                     } else {
                         let randPtr = mod._malloc(sdl<<1);
                         mod._w_shuffle(randPtr, sdl);
-                        let iPtr = (randPtr >> 1);
-                        let dPtr = iPtr;
-                        let endPtr = randPtr + sdl - 1;
-                        let currentPair = studyDat[mod.HEAPU16[iPtr]];
-                        let interrupt = false;
-                        let padd = false;
-                        ques.innerText = currentPair[1];
-                        prereview.addEventListener("click", () => {
-                            if (!padd) {
-                                mod.HEAPU8[dPtr] = mod.HEAPU8[iPtr];
-                                dPtr++;
-                                padd = true;
-                            }
-                        });
-                        submit.addEventListener("click", () => {
-                            if (!interrupt) {
-                                if (ans.value == currentPair[0]) {
-                                    if (iPtr == endPtr) {
-                                        // handle
-                                        console.log("Finished");
-                                        return;
-                                    }
-                                    iPtr++;
-                                    currentPair = studyDat[mod.HEAPU16[iPtr]];
-                                    ques.innerText = currentPair[1];
-                                    ans.value = "";
-                                } else {
-                                    interrupt = true;
-                                    ans.readOnly = true;
-                                    incorrectDisplay.style.display = "inline-block";
-                                    correctAns.innerText = currentPair[0];
-                                }
-                            }
-                        });
-                        ans.addEventListener("keydown", (key) => {
-                            if (!interrupt && key.key == "Enter") {
-                                key.preventDefault();
-                                if (ans.value == currentPair[0]) {
-                                    if (iPtr == endPtr) {
-                                        // handle
-                                        console.log("Finished");
-                                        return;
-                                    }
-                                    iPtr++;
-                                    currentPair = studyDat[mod.HEAPU16[iPtr]];
-                                    ques.innerText = currentPair[1];
-                                    ans.value = "";
-                                } else {
-                                    interrupt = true;
-                                    ans.readOnly = true;
-                                    incorrectDisplay.style.display = "inline-block";
-                                    correctAns.innerText = currentPair[0];
-                                }
-                            }
-                        });
-                        review.addEventListener("click", () => {
-                            if (!padd) {
-                                mod.HEAPU16[dPtr] = mod.HEAPU16[iPtr];
-                                dPtr++;
-                            }
-                            if (iPtr == endPtr) {
-                                // handle
-                                console.log("Finished");
-                                return;
-                            }
-                            incorrectDisplay.style.display = "none";
-                            iPtr++;
-                            currentPair = studyDat[mod.HEAPU16[iPtr]];
+                        processorFunction = () => {
+                            let iPtr = (randPtr >> 1);
+                            let dPtr = iPtr;
+                            let endPtr = iPtr + sdl - 1;
+                            let currentPair = studyDat[mod.HEAPU16[iPtr]];
+                            let interrupt = false;
+                            let padd = false;
                             ques.innerText = currentPair[1];
-                            ans.value = "";
-                            ans.readOnly = false;
-                            padd = false;
-                            interrupt = false;
-                        });
-                        skip.addEventListener("click", () => {
-                            if (iPtr == endPtr) {
-                                // handle
-                                console.log("Finished");
-                                return;
-                            }
-                            incorrectDisplay.style.display = "none";
-                            iPtr++;
-                            currentPair = studyDat[mod.HEAPU16[iPtr]];
-                            ques.innerText = currentPair[1];
-                            ans.value = "";
-                            ans.readOnly = false;
-                            padd = false;
-                            interrupt = false;
-                        });
-                        /*for (let n = randPtr >> 1; n < (randPtr >> 1) + sdl; n++) {
-                            console.log(mod.HEAPU16[n]);
-                        }*/
-                        //mod._free(randPtr);
+                            prereview.addEventListener("click", () => {
+                                if (!padd) {
+                                    mod.HEAPU16[dPtr] = mod.HEAPU16[iPtr];
+                                    dPtr++;
+                                    padd = true;
+                                }
+                            });
+                            submit.addEventListener("click", () => {
+                                if (!interrupt) {
+                                    if (ans.value == currentPair[0]) {
+                                        if (iPtr == endPtr) {
+                                            //handle
+                                            console.log("Finished");
+                                            return;
+                                        }
+                                        iPtr++;
+                                        currentPair = studyDat[mod.HEAPU16[iPtr]];
+                                        ques.innerText = currentPair[1];
+                                        ans.value = "";
+                                    } else {
+                                        interrupt = true;
+                                        ans.readOnly = true;
+                                        incorrectDisplay.style.display = "inline-block";
+                                        correctAns.innerText = currentPair[0];
+                                    }
+                                }
+                            });
+                            ans.addEventListener("keydown", (key) => {
+                                if (!interrupt && key.key == "Enter") {
+                                    key.preventDefault();
+                                    if (ans.value == currentPair[0]) {
+                                        if (iPtr == endPtr) {
+                                            // handle
+                                            console.log("Finished");
+                                            return;
+                                        }
+                                        iPtr++;
+                                        currentPair = studyDat[mod.HEAPU16[iPtr]];
+                                        ques.innerText = currentPair[1];
+                                        ans.value = "";
+                                    } else {
+                                        interrupt = true;
+                                        ans.readOnly = true;
+                                        incorrectDisplay.style.display = "inline-block";
+                                        correctAns.innerText = currentPair[0];
+                                    }
+                                }
+                            });
+                            review.addEventListener("click", () => {
+                                if (!padd) {
+                                    mod.HEAPU16[dPtr] = mod.HEAPU16[iPtr];
+                                    dPtr++;
+                                }
+                                if (iPtr == endPtr) {
+                                    // handle
+                                    console.log("Finished");
+                                    return;
+                                }
+                                incorrectDisplay.style.display = "none";
+                                iPtr++;
+                                currentPair = studyDat[mod.HEAPU16[iPtr]];
+                                ques.innerText = currentPair[1];
+                                ans.value = "";
+                                ans.readOnly = false;
+                                padd = false;
+                                interrupt = false;
+                            });
+                            skip.addEventListener("click", () => {
+                                if (iPtr == endPtr) {
+                                    // handle
+                                    console.log("Finished");
+                                    return;
+                                }
+                                incorrectDisplay.style.display = "none";
+                                iPtr++;
+                                currentPair = studyDat[mod.HEAPU16[iPtr]];
+                                ques.innerText = currentPair[1];
+                                ans.value = "";
+                                ans.readOnly = false;
+                                padd = false;
+                                interrupt = false;
+                            });
+                        }
                     }
                     initBody.style.display = "none";
                     entryBody.style.display = "block";
