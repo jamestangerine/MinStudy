@@ -51,7 +51,7 @@
                 </table>
             </div>
         </section>
-        <section id="resultsBody" style="display: block">
+        <section id="resultsBody" style="display: none">
             <h1>Results</h1>
             <textarea id="results" rows="8" cols="50" readonly></textarea><br>
             <p class="caption">These are the questions you missed. This text area is read-only, but you can resize it.</p>
@@ -152,6 +152,7 @@
                         let randPtr = mod._malloc(sdl);
                         mod._b_shuffle(randPtr, sdl);
                         let modRequired = true;
+                        let count = 1;
                         processorFunction = () => {
                             let iPtr = randPtr;
                             let dPtr = randPtr;
@@ -185,11 +186,11 @@
                                                 }
                                                 results.value = accumulator;
                                                 if (modRequired) {
-                                                    next.addEventListener("click", processorFunction());
+                                                    next.addEventListener("click", processorFunction);
                                                     modRequired = false;
                                                 }
                                             } else {
-
+                                                console.log("Implement final");
                                             }
                                             return;
                                         }
