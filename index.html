@@ -262,6 +262,7 @@
                                 interrupt = false;
                             });
                         }
+                        processorFunction();
                     } else {
                         let randPtr = mod._malloc(sdl<<1);
                         mod._w_shuffle(randPtr, sdl);
@@ -356,6 +357,7 @@
                                 interrupt = false;
                             });
                         }
+                        processorFunction();
                     }
                     initBody.style.display = "none";
                     entryBody.style.display = "block";
