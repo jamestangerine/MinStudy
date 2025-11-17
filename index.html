@@ -8,7 +8,7 @@
     </head>
     <body>
         <section id="initBody" style="display: block">
-            <div style="border: 1px solid #ffffff; display: inline-block; padding-left: 2em; padding-right: 2em">
+            <div id="report" style="border: 1px solid #ffffff; display: none; padding-left: 2em; padding-right: 2em">
                 <h2>Congratulations!</h2>
                 <p style="margin-top: -1em">You completed all terms in <span id="roundCount"></span> rounds.</p>
             </div>
@@ -91,6 +91,7 @@
         const next = document.getElementById("next");
         const homescreen = document.getElementById("homescreen");
         const roundCount = document.getElementById("roundCount");
+        const report = document.getElementById("report");
         let processorFunction = () => {};
         let finishFunction = () => {};
         let prereviewFunction = () => {};
@@ -104,12 +105,14 @@
         ans.addEventListener("keydown", (key) => ansFunction(key));
         review.addEventListener("click", () => reviewFunction());
         skip.addEventListener("click", () => skipFunction());
+        let resPtrRef;
         let iPtr;
         let dPtr;
         let endPtr;
         let currentPair;
         let interrupt = false;
         let padd = false;
+        let count = 1;
         import Module from "./prog.js";
         Module().then((mod) => {
             document.getElementById("start").addEventListener("click", () => {
@@ -117,7 +120,6 @@
                 const lSeparator = (termDef.value.length > 0 ? termDef.value : "\t");
                 const studyDat = input.value.split(gSeparator).map(e => e.split(lSeparator));
                 let sdl = studyDat.length;
-                let count = 1;
                 if (sdl < 3) {
                     errParent.style.visibility = "visible";
                     error.innerText = "Please enter at least 3 terms.";
@@ -213,6 +215,8 @@
                                 entryBody.style.display = "none";
                                 initBody.style.display = "block";
                                 roundCount.innerText = count;
+                                count = 1;
+                                report.style.display = "inline-block";
                             }
                         };
                         prereviewFunction = () => {
@@ -226,7 +230,7 @@
                             if (!interrupt) {
                                 if (ans.value == currentPair[0]) {
                                     if (iPtr == endPtr) {
-                                        //handle
+                                        finishFunction();
                                         return;
                                     }
                                     iPtr++;
@@ -246,8 +250,7 @@
                                 key.preventDefault();
                                 if (ans.value == currentPair[0]) {
                                     if (iPtr == endPtr) {
-                                        // handle
-                                        console.log("Finished");
+                                        finishFunction();
                                         return;
                                     }
                                     iPtr++;
@@ -268,8 +271,7 @@
                                 dPtr++;
                             }
                             if (iPtr == endPtr) {
-                                // handle
-                                console.log("Finished");
+                                finishFunction();
                                 return;
                             }
                             incorrectDisplay.style.display = "none";
@@ -283,8 +285,7 @@
                         };
                         skipFunction = "click", () => {
                             if (iPtr == endPtr) {
-                                // handle
-                                console.log("Finished");
+                                finishFunction();
                                 return;
                             }
                             incorrectDisplay.style.display = "none";
@@ -301,13 +302,14 @@
                         mod._w_shuffle(randPtr, sdl);
                         // initial function
                         iPtr = (randPtr >> 1);
+                        resPtrRef = iPtr;
                         dPtr = iPtr;
                         endPtr = iPtr + sdl - 1;
                         currentPair = studyDat[mod.HEAPU16[iPtr]];
                         ques.innerText = currentPair[1];
                         // end initial function
                         processorFunction = () => {
-                            iPtr = (randPtr >> 1);
+                            iPtr = resPtrRef;
                             dPtr = iPtr;
                             endPtr = iPtr + sdl - 1;
                             currentPair = studyDat[mod.HEAPU16[iPtr]];
@@ -318,6 +320,29 @@
                             ans.readOnly = false;
                             resultsBody.style.display = "none";
                             entryBody.style.display = "block";
+                        };
+                        finishFunction = () => {
+                            let resPtr = resPtrRef;
+                            sdl = dPtr - resPtr;
+                            if (sdl != 0) {
+                                entryBody.style.display = "none";
+                                resultsBody.style.display = "block";
+                                currentPair = studyDat[mod.HEAPU16[resPtr]];
+                                let accumulator = currentPair[0]+lSeparator+currentPair[1];
+                                while (resPtr < dPtr-1) {
+                                    resPtr++;
+                                    currentPair = studyDat[mod.HEAPU16[resPtr]];
+                                    accumulator += gSeparator+currentPair[0]+lSeparator+currentPair[1];
+                                }
+                                results.value = accumulator;
+                                count++;
+                            } else {
+                                entryBody.style.display = "none";
+                                initBody.style.display = "block";
+                                roundCount.innerText = count;
+                                count = 1;
+                                report.style.display = "inline-block";
+                            }
                         };
                         prereviewFunction = () => {
                             if (!padd) {
@@ -330,8 +355,7 @@
                             if (!interrupt) {
                                 if (ans.value == currentPair[0]) {
                                     if (iPtr == endPtr) {
-                                        //handle
-                                        console.log("Finished");
+                                        finishFunction();
                                         return;
                                     }
                                     iPtr++;
@@ -351,8 +375,7 @@
                                 key.preventDefault();
                                 if (ans.value == currentPair[0]) {
                                     if (iPtr == endPtr) {
-                                        // handle
-                                        console.log("Finished");
+                                        finishFunction();
                                         return;
                                     }
                                     iPtr++;
@@ -373,8 +396,7 @@
                                 dPtr++;
                             }
                             if (iPtr == endPtr) {
-                                // handle
-                                console.log("Finished");
+                                finishFunction();
                                 return;
                             }
                             incorrectDisplay.style.display = "none";
@@ -388,8 +410,7 @@
                         };
                         skipFunction = () => {
                             if (iPtr == endPtr) {
-                                // handle
-                                console.log("Finished");
+                                finishFunction();
                                 return;
                             }
                             incorrectDisplay.style.display = "none";
