@@ -1,4 +1,4 @@
-const currentVersion = "Prerelease v48";
+const currentVersion = "Prerelease v49";
 
 const CACHE_LIST = [
     "/MinStudy/",

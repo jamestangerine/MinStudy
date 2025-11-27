@@ -35,7 +35,7 @@
                     </td>
                 </tr>
             </table>
-            <br><button id="start">Begin Studying</button>
+            <br id="extraBreak" style="display: none"><button id="start">Begin Studying</button>
             <p style="visibility: hidden; text-align: center;"><b class="err">Error:</b> <span id="error-message"></span></p>
         </section>
         <section id="entryBody" style="display: none">
@@ -99,6 +99,7 @@
         const report = document.getElementById("report");
         const repeatDialogue = document.getElementById("repeatDialogue");
         const restudy = document.getElementById("restudy");
+        const extraBreak = document.getElementById("extraBreak");
         let processorFunction = () => {};
         let finishFunction = () => {};
         let prereviewFunction = () => {};
@@ -114,6 +115,15 @@
         review.addEventListener("click", () => reviewFunction());
         skip.addEventListener("click", () => skipFunction());
         restudy.addEventListener("click", () => restudyFunction());
+        homescreen.addEventListener("click", () => {
+            entryBody.style.display = "none";
+            initBody.style.display = "block";
+            roundCount.innerText = count;
+            count = 1;
+            report.style.display = "inline-block";
+            repeatDialogue.style.display = "inline-block";
+            extraBreak.style.display = "block";
+        });
         let resPtrRef;
         let iPtr;
         let dPtr;
@@ -143,10 +153,16 @@
                 if (sdl < 3) {
                     errParent.style.visibility = "visible";
                     error.innerText = "Please enter at least 3 terms.";
+                    repeatDialogue.style.display = "none";
+                    extraBreak.style.display = "none";
+                    return;
                 }
                 else if (sdl > 2500) {
                     errParent.style.visibility = "visible";
                     error.innerText = "You have entered "+sdl.toString()+" terms, exceeding the limit of 2500. Please enter no more than 2500 terms.";
+                    repeatDialogue.style.display = "none";
+                    extraBreak.style.display = "none";
+                    return;
                 }
                 else {
                     for (let ct = 0; ct < sdl; ct++) {
@@ -157,11 +173,13 @@
                                 errParent.style.visibility = "visible";
                                 error.innerText = "Entry "+(ct+1).toString()+" (\" . . . "+curr[1]+" . . . \") is missing a term. Please ensure all entries have a term.";
                                 repeatDialogue.style.display = "none";
+                                extraBreak.style.display = "none";
                                 return;
                             } else if (curr[1].length == 0) {
                                 errParent.style.visibility = "visible";
                                 error.innerText = "Entry "+(ct+1).toString()+" (\""+curr[0]+" . . . \") is missing a definition. Please ensure all entries have a definition.";
                                 repeatDialogue.style.display = "none";
+                                extraBreak.style.display = "none";
                                 return;
                             }
                         } else if (cl == 1) {
@@ -169,11 +187,13 @@
                                 errParent.style.visibility = "visible";
                                 error.innerText = "Entry "+(ct+1).toString()+" is empty. Please ensure all entries have a term and definition.";
                                 repeatDialogue.style.display = "none";
+                                extraBreak.style.display = "none";
                                 return;
                             } else {
                                 errParent.style.visibility = "visible";
                                 error.innerText = "Entry "+(ct+1).toString()+" (\""+curr[0]+" . . . \") is missing a term or definition. Please ensure all entries have a term and definition.";
                                 repeatDialogue.style.display = "none";
+                                extraBreak.style.display = "none";
                                 return;
                             }
                         } else {
@@ -183,16 +203,19 @@
                                     if (curr[i].length != 0) {
                                         error.innerText = "Entry "+(ct+1).toString()+" (\" . . . "+curr[i]+" . . . \") is improperly formatted. Please ensure all entries have exactly one term and one definition.";
                                         repeatDialogue.style.display = "none";
+                                        extraBreak.style.display = "none";
                                         return;
                                     }
                                 }
                                 error.innerText = "Entry "+(ct+1).toString()+" only contains separator characters. Please ensure all entries have exactly one term and one definition.";
                                 repeatDialogue.style.display = "none";
+                                extraBreak.style.display = "none";
                                 return;
                             } else {
                                 errParent.style.visibility = "visible";
                                 error.innerText = "Entry "+(ct+1).toString()+" (\""+curr[0]+" . . . \") is improperly formatted. Please ensure all entries have exactly one term and one definition.";
                                 repeatDialogue.style.display = "none";
+                                extraBreak.style.display = "none";
                                 return;
                             }
                         }
@@ -219,11 +242,7 @@
                                 dPtr = randPtr;
                                 endPtr = randPtr + sdl - 1;
                                 currentPair = studyDat[mod.HEAPU8[randPtr]];
-                                interrupt = false;
-                                padd = false;
                                 ques.innerText = currentPair[1];
-                                ans.value = "";
-                                ans.readOnly = false;
                                 resultsBody.style.display = "none";
                                 entryBody.style.display = "block";
                             };
@@ -249,6 +268,7 @@
                                     count = 1;
                                     report.style.display = "inline-block";
                                     repeatDialogue.style.display = "inline-block";
+                                    extraBreak.style.display = "block";
                                 }
                             };
                             prereviewFunction = () => {
@@ -302,6 +322,10 @@
                                     mod.HEAPU8[dPtr] = mod.HEAPU8[iPtr];
                                     dPtr++;
                                 }
+                                ans.value = "";
+                                ans.readOnly = false;
+                                padd = false;
+                                interrupt = false;
                                 if (iPtr == endPtr) {
                                     finishFunction();
                                     return;
@@ -310,12 +334,12 @@
                                 iPtr++;
                                 currentPair = studyDat[mod.HEAPU8[iPtr]];
                                 ques.innerText = currentPair[1];
-                                ans.value = "";
-                                ans.readOnly = false;
-                                padd = false;
-                                interrupt = false;
                             };
                             skipFunction = () => {
+                                ans.value = "";
+                                ans.readOnly = false;
+                                padd = false;
+                                interrupt = false;
                                 if (iPtr == endPtr) {
                                     finishFunction();
                                     return;
@@ -324,10 +348,6 @@
                                 iPtr++;
                                 currentPair = studyDat[mod.HEAPU8[iPtr]];
                                 ques.innerText = currentPair[1];
-                                ans.value = "";
-                                ans.readOnly = false;
-                                padd = false;
-                                interrupt = false;
                             };
                             restudyFunction = () => {
                                 errParent.style.visibility = "hidden";
@@ -362,11 +382,7 @@
                                 dPtr = iPtr;
                                 endPtr = iPtr + sdl - 1;
                                 currentPair = studyDat[mod.HEAPU16[iPtr]];
-                                interrupt = false;
-                                padd = false;
                                 ques.innerText = currentPair[1];
-                                ans.value = "";
-                                ans.readOnly = false;
                                 resultsBody.style.display = "none";
                                 entryBody.style.display = "block";
                             };
@@ -392,6 +408,7 @@
                                     count = 1;
                                     report.style.display = "inline-block";
                                     repeatDialogue.style.display = "inline-block";
+                                    extraBreak.style.display = "block";
                                 }
                             };
                             prereviewFunction = () => {
@@ -445,6 +462,10 @@
                                     mod.HEAPU16[dPtr] = mod.HEAPU16[iPtr];
                                     dPtr++;
                                 }
+                                ans.value = "";
+                                ans.readOnly = false;
+                                padd = false;
+                                interrupt = false;
                                 if (iPtr == endPtr) {
                                     finishFunction();
                                     return;
@@ -453,12 +474,12 @@
                                 iPtr++;
                                 currentPair = studyDat[mod.HEAPU16[iPtr]];
                                 ques.innerText = currentPair[1];
-                                ans.value = "";
-                                ans.readOnly = false;
-                                padd = false;
-                                interrupt = false;
                             };
                             skipFunction = () => {
+                                ans.value = "";
+                                ans.readOnly = false;
+                                padd = false;
+                                interrupt = false;
                                 if (iPtr == endPtr) {
                                     finishFunction();
                                     return;
@@ -467,10 +488,6 @@
                                 iPtr++;
                                 currentPair = studyDat[mod.HEAPU16[iPtr]];
                                 ques.innerText = currentPair[1];
-                                ans.value = "";
-                                ans.readOnly = false;
-                                padd = false;
-                                interrupt = false;
                             };
                             restudyFunction = () => {
                                 errParent.style.visibility = "hidden";
@@ -478,8 +495,7 @@
                                 entryBody.style.display = "block";
                                 sdl = bSdl;
                                 mod._w_shuffle(randPtr, sdl);
-                                iPtr = (randPtr >> 1);
-                                resPtrRef = iPtr;
+                                iPtr = resPtrRef;
                                 dPtr = iPtr;
                                 endPtr = iPtr + sdl - 1;
                                 currentPair = studyDat[mod.HEAPU16[iPtr]];
