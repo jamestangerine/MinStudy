@@ -8,11 +8,16 @@
     </head>
     <body>
         <section id="initBody" style="display: block">
-            <div id="report" style="border: 1px solid #ffffff; display: none; padding-left: 2em; padding-right: 2em">
+            <div id="report" class="finishDisplay">
                 <h2>Congratulations!</h2>
                 <p style="margin-top: -1em">You completed all terms in <span id="roundCount"></span> rounds.</p>
             </div>
             <h1>Minimal Studier</h1>
+            <div id="repeatDialogue" class="finishDisplay">
+                <p>Retry with the same list?</p>
+                <button id="restudy" style="margin-bottom:1em">Study Again</button>
+            </div>
+            <br>
             <div class="centered">
                 <p>Enter a study list with 3 to 2500 term-definition pairs.</p>
                 <textarea id="input" rows="8" cols="50" placeholder="term&#9;definition&#10;term&#9;definition&#10;term&#9;definition&#10;..."></textarea>
@@ -92,6 +97,8 @@
         const homescreen = document.getElementById("homescreen");
         const roundCount = document.getElementById("roundCount");
         const report = document.getElementById("report");
+        const repeatDialogue = document.getElementById("repeatDialogue");
+        const restudy = document.getElementById("restudy");
         let processorFunction = () => {};
         let finishFunction = () => {};
         let prereviewFunction = () => {};
@@ -99,12 +106,14 @@
         let ansFunction = (key) => {};
         let reviewFunction = () => {};
         let skipFunction = () => {};
+        let restudyFunction = () => {};
         next.addEventListener("click", () => processorFunction());
         prereview.addEventListener("click", () => prereviewFunction());
         submit.addEventListener("click", () => submitFunction());
         ans.addEventListener("keydown", (key) => ansFunction(key));
         review.addEventListener("click", () => reviewFunction());
         skip.addEventListener("click", () => skipFunction());
+        restudy.addEventListener("click", () => restudyFunction());
         let resPtrRef;
         let iPtr;
         let dPtr;
@@ -113,12 +122,23 @@
         let interrupt = false;
         let padd = false;
         let count = 1;
+        let pElems = -1;
+        let studyDat;
+        let bSdl;
+        let randPtr;
+        homescreen.addEventListener("click", () => {
+            entryBody.style.display = "none";
+            initBody.style.display = "block";
+            roundCount.innerText = count;
+            count = 1;
+            report.style.display = "inline-block";
+        });
         import Module from "./prog.js";
         Module().then((mod) => {
             document.getElementById("start").addEventListener("click", () => {
                 const gSeparator = (entry.value.length > 0 ? entry.value : "\n");
                 const lSeparator = (termDef.value.length > 0 ? termDef.value : "\t");
-                const studyDat = input.value.split(gSeparator).map(e => e.split(lSeparator));
+                studyDat = input.value.split(gSeparator).map(e => e.split(lSeparator));
                 let sdl = studyDat.length;
                 if (sdl < 3) {
                     errParent.style.visibility = "visible";
@@ -136,20 +156,24 @@
                             if (curr[0].length == 0) {
                                 errParent.style.visibility = "visible";
                                 error.innerText = "Entry "+(ct+1).toString()+" (\" . . . "+curr[1]+" . . . \") is missing a term. Please ensure all entries have a term.";
+                                repeatDialogue.style.display = "none";
                                 return;
                             } else if (curr[1].length == 0) {
                                 errParent.style.visibility = "visible";
                                 error.innerText = "Entry "+(ct+1).toString()+" (\""+curr[0]+" . . . \") is missing a definition. Please ensure all entries have a definition.";
+                                repeatDialogue.style.display = "none";
                                 return;
                             }
                         } else if (cl == 1) {
                             if (curr[0].length == 0) {
                                 errParent.style.visibility = "visible";
                                 error.innerText = "Entry "+(ct+1).toString()+" is empty. Please ensure all entries have a term and definition.";
+                                repeatDialogue.style.display = "none";
                                 return;
                             } else {
                                 errParent.style.visibility = "visible";
                                 error.innerText = "Entry "+(ct+1).toString()+" (\""+curr[0]+" . . . \") is missing a term or definition. Please ensure all entries have a term and definition.";
+                                repeatDialogue.style.display = "none";
                                 return;
                             }
                         } else {
@@ -158,14 +182,17 @@
                                 for (let i = 1; i < cl; i++) {
                                     if (curr[i].length != 0) {
                                         error.innerText = "Entry "+(ct+1).toString()+" (\" . . . "+curr[i]+" . . . \") is improperly formatted. Please ensure all entries have exactly one term and one definition.";
+                                        repeatDialogue.style.display = "none";
                                         return;
                                     }
                                 }
                                 error.innerText = "Entry "+(ct+1).toString()+" only contains separator characters. Please ensure all entries have exactly one term and one definition.";
+                                repeatDialogue.style.display = "none";
                                 return;
                             } else {
                                 errParent.style.visibility = "visible";
                                 error.innerText = "Entry "+(ct+1).toString()+" (\""+curr[0]+" . . . \") is improperly formatted. Please ensure all entries have exactly one term and one definition.";
+                                repeatDialogue.style.display = "none";
                                 return;
                             }
                         }
@@ -173,8 +200,11 @@
                     errParent.style.visibility = "hidden";
                     initBody.style.display = "none";
                     entryBody.style.display = "block";
+                    bSdl = sdl;
                     if (sdl < 256) {
-                        let randPtr = mod._malloc(sdl);
+                        if (pElems != -1)
+                            mod._free(randPtr);
+                        randPtr = mod._malloc(sdl);
                         mod._b_shuffle(randPtr, sdl);
                         // initial function
                         iPtr = randPtr;
@@ -183,122 +213,140 @@
                         currentPair = studyDat[mod.HEAPU8[randPtr]];
                         ques.innerText = currentPair[1];
                         // end initial function
-                        processorFunction = () => {
-                            iPtr = randPtr;
-                            dPtr = randPtr;
-                            endPtr = randPtr + sdl - 1;
-                            currentPair = studyDat[mod.HEAPU8[randPtr]];
-                            interrupt = false;
-                            padd = false;
-                            ques.innerText = currentPair[1];
-                            ans.value = "";
-                            ans.readOnly = false;
-                            resultsBody.style.display = "none";
-                            entryBody.style.display = "block";
-                        };
-                        finishFunction = () => {
-                            let resPtr = randPtr;
-                            sdl = dPtr - resPtr;
-                            if (sdl != 0) {
-                                entryBody.style.display = "none";
-                                resultsBody.style.display = "block";
-                                currentPair = studyDat[mod.HEAPU8[resPtr]];
-                                let accumulator = currentPair[0]+lSeparator+currentPair[1];
-                                while (resPtr < dPtr-1) {
-                                    resPtr++;
+                        if (pElems >= 256 || pElems == -1) {
+                            processorFunction = () => {
+                                iPtr = randPtr;
+                                dPtr = randPtr;
+                                endPtr = randPtr + sdl - 1;
+                                currentPair = studyDat[mod.HEAPU8[randPtr]];
+                                interrupt = false;
+                                padd = false;
+                                ques.innerText = currentPair[1];
+                                ans.value = "";
+                                ans.readOnly = false;
+                                resultsBody.style.display = "none";
+                                entryBody.style.display = "block";
+                            };
+                            finishFunction = () => {
+                                let resPtr = randPtr;
+                                sdl = dPtr - resPtr;
+                                if (sdl != 0) {
+                                    entryBody.style.display = "none";
+                                    resultsBody.style.display = "block";
                                     currentPair = studyDat[mod.HEAPU8[resPtr]];
-                                    accumulator += gSeparator+currentPair[0]+lSeparator+currentPair[1];
-                                }
-                                results.value = accumulator;
-                                count++;
-                            } else {
-                                entryBody.style.display = "none";
-                                initBody.style.display = "block";
-                                roundCount.innerText = count;
-                                count = 1;
-                                report.style.display = "inline-block";
-                            }
-                        };
-                        prereviewFunction = () => {
-                            if (!padd) {
-                                mod.HEAPU8[dPtr] = mod.HEAPU8[iPtr];
-                                dPtr++;
-                                padd = true;
-                            }
-                        };
-                        submitFunction = () => {
-                            if (!interrupt) {
-                                if (ans.value == currentPair[0]) {
-                                    if (iPtr == endPtr) {
-                                        finishFunction();
-                                        return;
+                                    let accumulator = currentPair[0]+lSeparator+currentPair[1];
+                                    while (resPtr < dPtr-1) {
+                                        resPtr++;
+                                        currentPair = studyDat[mod.HEAPU8[resPtr]];
+                                        accumulator += gSeparator+currentPair[0]+lSeparator+currentPair[1];
                                     }
-                                    iPtr++;
-                                    currentPair = studyDat[mod.HEAPU8[iPtr]];
-                                    ques.innerText = currentPair[1];
-                                    ans.value = "";
+                                    results.value = accumulator;
+                                    count++;
                                 } else {
-                                    interrupt = true;
-                                    ans.readOnly = true;
-                                    incorrectDisplay.style.display = "inline-block";
-                                    correctAns.innerText = currentPair[0];
+                                    entryBody.style.display = "none";
+                                    initBody.style.display = "block";
+                                    roundCount.innerText = count;
+                                    count = 1;
+                                    report.style.display = "inline-block";
+                                    repeatDialogue.style.display = "inline-block";
                                 }
-                            }
-                        };
-                        ansFunction = (key) => {
-                            if (!interrupt && key.key == "Enter") {
-                                key.preventDefault();
-                                if (ans.value == currentPair[0]) {
-                                    if (iPtr == endPtr) {
-                                        finishFunction();
-                                        return;
+                            };
+                            prereviewFunction = () => {
+                                if (!padd) {
+                                    mod.HEAPU8[dPtr] = mod.HEAPU8[iPtr];
+                                    dPtr++;
+                                    padd = true;
+                                }
+                            };
+                            submitFunction = () => {
+                                if (!interrupt) {
+                                    if (ans.value == currentPair[0]) {
+                                        if (iPtr == endPtr) {
+                                            finishFunction();
+                                            return;
+                                        }
+                                        iPtr++;
+                                        currentPair = studyDat[mod.HEAPU8[iPtr]];
+                                        ques.innerText = currentPair[1];
+                                        ans.value = "";
+                                    } else {
+                                        interrupt = true;
+                                        ans.readOnly = true;
+                                        incorrectDisplay.style.display = "inline-block";
+                                        correctAns.innerText = currentPair[0];
                                     }
-                                    iPtr++;
-                                    currentPair = studyDat[mod.HEAPU8[iPtr]];
-                                    ques.innerText = currentPair[1];
-                                    ans.value = "";
-                                } else {
-                                    interrupt = true;
-                                    ans.readOnly = true;
-                                    incorrectDisplay.style.display = "inline-block";
-                                    correctAns.innerText = currentPair[0];
                                 }
-                            }
-                        };
-                        reviewFunction = () => {
-                            if (!padd) {
-                                mod.HEAPU8[dPtr] = mod.HEAPU8[iPtr];
-                                dPtr++;
-                            }
-                            if (iPtr == endPtr) {
-                                finishFunction();
-                                return;
-                            }
-                            incorrectDisplay.style.display = "none";
-                            iPtr++;
-                            currentPair = studyDat[mod.HEAPU8[iPtr]];
-                            ques.innerText = currentPair[1];
-                            ans.value = "";
-                            ans.readOnly = false;
-                            padd = false;
-                            interrupt = false;
-                        };
-                        skipFunction = "click", () => {
-                            if (iPtr == endPtr) {
-                                finishFunction();
-                                return;
-                            }
-                            incorrectDisplay.style.display = "none";
-                            iPtr++;
-                            currentPair = studyDat[mod.HEAPU8[iPtr]];
-                            ques.innerText = currentPair[1];
-                            ans.value = "";
-                            ans.readOnly = false;
-                            padd = false;
-                            interrupt = false;
-                        };
+                            };
+                            ansFunction = (key) => {
+                                if (!interrupt && key.key == "Enter") {
+                                    key.preventDefault();
+                                    if (ans.value == currentPair[0]) {
+                                        if (iPtr == endPtr) {
+                                            finishFunction();
+                                            return;
+                                        }
+                                        iPtr++;
+                                        currentPair = studyDat[mod.HEAPU8[iPtr]];
+                                        ques.innerText = currentPair[1];
+                                        ans.value = "";
+                                    } else {
+                                        interrupt = true;
+                                        ans.readOnly = true;
+                                        incorrectDisplay.style.display = "inline-block";
+                                        correctAns.innerText = currentPair[0];
+                                    }
+                                }
+                            };
+                            reviewFunction = () => {
+                                if (!padd) {
+                                    mod.HEAPU8[dPtr] = mod.HEAPU8[iPtr];
+                                    dPtr++;
+                                }
+                                if (iPtr == endPtr) {
+                                    finishFunction();
+                                    return;
+                                }
+                                incorrectDisplay.style.display = "none";
+                                iPtr++;
+                                currentPair = studyDat[mod.HEAPU8[iPtr]];
+                                ques.innerText = currentPair[1];
+                                ans.value = "";
+                                ans.readOnly = false;
+                                padd = false;
+                                interrupt = false;
+                            };
+                            skipFunction = () => {
+                                if (iPtr == endPtr) {
+                                    finishFunction();
+                                    return;
+                                }
+                                incorrectDisplay.style.display = "none";
+                                iPtr++;
+                                currentPair = studyDat[mod.HEAPU8[iPtr]];
+                                ques.innerText = currentPair[1];
+                                ans.value = "";
+                                ans.readOnly = false;
+                                padd = false;
+                                interrupt = false;
+                            };
+                            restudyFunction = () => {
+                                errParent.style.visibility = "hidden";
+                                initBody.style.display = "none";
+                                entryBody.style.display = "block";
+                                sdl = bSdl;
+                                mod._b_shuffle(randPtr, sdl);
+                                iPtr = randPtr;
+                                dPtr = randPtr;
+                                endPtr = randPtr + sdl - 1;
+                                currentPair = studyDat[mod.HEAPU8[randPtr]];
+                                ques.innerText = currentPair[1];
+                            };
+                        }
+                        pElems = sdl;
                     } else {
-                        let randPtr = mod._malloc(sdl<<1);
+                        if (pElems != -1)
+                            mod._free(randPtr);
+                        randPtr = mod._malloc(sdl<<1);
                         mod._w_shuffle(randPtr, sdl);
                         // initial function
                         iPtr = (randPtr >> 1);
@@ -308,123 +356,138 @@
                         currentPair = studyDat[mod.HEAPU16[iPtr]];
                         ques.innerText = currentPair[1];
                         // end initial function
-                        processorFunction = () => {
-                            iPtr = resPtrRef;
-                            dPtr = iPtr;
-                            endPtr = iPtr + sdl - 1;
-                            currentPair = studyDat[mod.HEAPU16[iPtr]];
-                            interrupt = false;
-                            padd = false;
-                            ques.innerText = currentPair[1];
-                            ans.value = "";
-                            ans.readOnly = false;
-                            resultsBody.style.display = "none";
-                            entryBody.style.display = "block";
-                        };
-                        finishFunction = () => {
-                            let resPtr = resPtrRef;
-                            sdl = dPtr - resPtr;
-                            if (sdl != 0) {
-                                entryBody.style.display = "none";
-                                resultsBody.style.display = "block";
-                                currentPair = studyDat[mod.HEAPU16[resPtr]];
-                                let accumulator = currentPair[0]+lSeparator+currentPair[1];
-                                while (resPtr < dPtr-1) {
-                                    resPtr++;
+                        if (pElems < 256) {
+                            processorFunction = () => {
+                                iPtr = resPtrRef;
+                                dPtr = iPtr;
+                                endPtr = iPtr + sdl - 1;
+                                currentPair = studyDat[mod.HEAPU16[iPtr]];
+                                interrupt = false;
+                                padd = false;
+                                ques.innerText = currentPair[1];
+                                ans.value = "";
+                                ans.readOnly = false;
+                                resultsBody.style.display = "none";
+                                entryBody.style.display = "block";
+                            };
+                            finishFunction = () => {
+                                let resPtr = resPtrRef;
+                                sdl = dPtr - resPtr;
+                                if (sdl != 0) {
+                                    entryBody.style.display = "none";
+                                    resultsBody.style.display = "block";
                                     currentPair = studyDat[mod.HEAPU16[resPtr]];
-                                    accumulator += gSeparator+currentPair[0]+lSeparator+currentPair[1];
-                                }
-                                results.value = accumulator;
-                                count++;
-                            } else {
-                                entryBody.style.display = "none";
-                                initBody.style.display = "block";
-                                roundCount.innerText = count;
-                                count = 1;
-                                report.style.display = "inline-block";
-                            }
-                        };
-                        prereviewFunction = () => {
-                            if (!padd) {
-                                mod.HEAPU16[dPtr] = mod.HEAPU16[iPtr];
-                                dPtr++;
-                                padd = true;
-                            }
-                        };
-                        submitFunction = () => {
-                            if (!interrupt) {
-                                if (ans.value == currentPair[0]) {
-                                    if (iPtr == endPtr) {
-                                        finishFunction();
-                                        return;
+                                    let accumulator = currentPair[0]+lSeparator+currentPair[1];
+                                    while (resPtr < dPtr-1) {
+                                        resPtr++;
+                                        currentPair = studyDat[mod.HEAPU16[resPtr]];
+                                        accumulator += gSeparator+currentPair[0]+lSeparator+currentPair[1];
                                     }
-                                    iPtr++;
-                                    currentPair = studyDat[mod.HEAPU16[iPtr]];
-                                    ques.innerText = currentPair[1];
-                                    ans.value = "";
+                                    results.value = accumulator;
+                                    count++;
                                 } else {
-                                    interrupt = true;
-                                    ans.readOnly = true;
-                                    incorrectDisplay.style.display = "inline-block";
-                                    correctAns.innerText = currentPair[0];
+                                    entryBody.style.display = "none";
+                                    initBody.style.display = "block";
+                                    roundCount.innerText = count;
+                                    count = 1;
+                                    report.style.display = "inline-block";
+                                    repeatDialogue.style.display = "inline-block";
                                 }
-                            }
-                        };
-                        ansFunction = (key) => {
-                            if (!interrupt && key.key == "Enter") {
-                                key.preventDefault();
-                                if (ans.value == currentPair[0]) {
-                                    if (iPtr == endPtr) {
-                                        finishFunction();
-                                        return;
+                            };
+                            prereviewFunction = () => {
+                                if (!padd) {
+                                    mod.HEAPU16[dPtr] = mod.HEAPU16[iPtr];
+                                    dPtr++;
+                                    padd = true;
+                                }
+                            };
+                            submitFunction = () => {
+                                if (!interrupt) {
+                                    if (ans.value == currentPair[0]) {
+                                        if (iPtr == endPtr) {
+                                            finishFunction();
+                                            return;
+                                        }
+                                        iPtr++;
+                                        currentPair = studyDat[mod.HEAPU16[iPtr]];
+                                        ques.innerText = currentPair[1];
+                                        ans.value = "";
+                                    } else {
+                                        interrupt = true;
+                                        ans.readOnly = true;
+                                        incorrectDisplay.style.display = "inline-block";
+                                        correctAns.innerText = currentPair[0];
                                     }
-                                    iPtr++;
-                                    currentPair = studyDat[mod.HEAPU16[iPtr]];
-                                    ques.innerText = currentPair[1];
-                                    ans.value = "";
-                                } else {
-                                    interrupt = true;
-                                    ans.readOnly = true;
-                                    incorrectDisplay.style.display = "inline-block";
-                                    correctAns.innerText = currentPair[0];
                                 }
-                            }
-                        };
-                        reviewFunction = () => {
-                            if (!padd) {
-                                mod.HEAPU16[dPtr] = mod.HEAPU16[iPtr];
-                                dPtr++;
-                            }
-                            if (iPtr == endPtr) {
-                                finishFunction();
-                                return;
-                            }
-                            incorrectDisplay.style.display = "none";
-                            iPtr++;
-                            currentPair = studyDat[mod.HEAPU16[iPtr]];
-                            ques.innerText = currentPair[1];
-                            ans.value = "";
-                            ans.readOnly = false;
-                            padd = false;
-                            interrupt = false;
-                        };
-                        skipFunction = () => {
-                            if (iPtr == endPtr) {
-                                finishFunction();
-                                return;
-                            }
-                            incorrectDisplay.style.display = "none";
-                            iPtr++;
-                            currentPair = studyDat[mod.HEAPU16[iPtr]];
-                            ques.innerText = currentPair[1];
-                            ans.value = "";
-                            ans.readOnly = false;
-                            padd = false;
-                            interrupt = false;
-                        };
+                            };
+                            ansFunction = (key) => {
+                                if (!interrupt && key.key == "Enter") {
+                                    key.preventDefault();
+                                    if (ans.value == currentPair[0]) {
+                                        if (iPtr == endPtr) {
+                                            finishFunction();
+                                            return;
+                                        }
+                                        iPtr++;
+                                        currentPair = studyDat[mod.HEAPU16[iPtr]];
+                                        ques.innerText = currentPair[1];
+                                        ans.value = "";
+                                    } else {
+                                        interrupt = true;
+                                        ans.readOnly = true;
+                                        incorrectDisplay.style.display = "inline-block";
+                                        correctAns.innerText = currentPair[0];
+                                    }
+                                }
+                            };
+                            reviewFunction = () => {
+                                if (!padd) {
+                                    mod.HEAPU16[dPtr] = mod.HEAPU16[iPtr];
+                                    dPtr++;
+                                }
+                                if (iPtr == endPtr) {
+                                    finishFunction();
+                                    return;
+                                }
+                                incorrectDisplay.style.display = "none";
+                                iPtr++;
+                                currentPair = studyDat[mod.HEAPU16[iPtr]];
+                                ques.innerText = currentPair[1];
+                                ans.value = "";
+                                ans.readOnly = false;
+                                padd = false;
+                                interrupt = false;
+                            };
+                            skipFunction = () => {
+                                if (iPtr == endPtr) {
+                                    finishFunction();
+                                    return;
+                                }
+                                incorrectDisplay.style.display = "none";
+                                iPtr++;
+                                currentPair = studyDat[mod.HEAPU16[iPtr]];
+                                ques.innerText = currentPair[1];
+                                ans.value = "";
+                                ans.readOnly = false;
+                                padd = false;
+                                interrupt = false;
+                            };
+                            restudyFunction = () => {
+                                errParent.style.visibility = "hidden";
+                                initBody.style.display = "none";
+                                entryBody.style.display = "block";
+                                sdl = bSdl;
+                                mod._w_shuffle(randPtr, sdl);
+                                iPtr = (randPtr >> 1);
+                                resPtrRef = iPtr;
+                                dPtr = iPtr;
+                                endPtr = iPtr + sdl - 1;
+                                currentPair = studyDat[mod.HEAPU16[iPtr]];
+                                ques.innerText = currentPair[1];
+                            };
+                        }
+                        pElems = sdl;
                     }
-                    initBody.style.display = "none";
-                    entryBody.style.display = "block";
                 }
             });
         });

@@ -27,6 +27,13 @@ table {
     color: #ff0000;
 }
 
+.finishDisplay {
+    border: 1px solid #ffffff;
+    display: none;
+    padding-left: 2em;
+    padding-right: 2em;
+}
+
 textarea {
     background-color: #000000;
     color: #ffffff;
