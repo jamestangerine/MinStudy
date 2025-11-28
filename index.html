@@ -17,7 +17,7 @@
                 <p>Retry with the same list?</p>
                 <button id="restudy" style="margin-bottom:1em">Study Again</button>
             </div>
-            <br>
+            <br id="extraBreak" style="display: none">
             <div class="centered">
                 <p>Enter a study list with 3 to 2500 term-definition pairs.</p>
                 <textarea id="input" rows="8" cols="50" placeholder="term&#9;definition&#10;term&#9;definition&#10;term&#9;definition&#10;..."></textarea>
@@ -35,7 +35,9 @@
                     </td>
                 </tr>
             </table>
-            <br id="extraBreak" style="display: none"><button id="start">Begin Studying</button>
+            <h3>Question Style:</h3>
+            <p>Ask <span id="ask1">definition</span>&nbsp;&nbsp;&nbsp;<button id="swap1">Swap</button>&nbsp;&nbsp;&nbsp;Answer with <span id="ans1">test</span></p>
+            <br><button id="start">Begin Studying</button>
             <p style="visibility: hidden; text-align: center;"><b class="err">Error:</b> <span id="error-message"></span></p>
         </section>
         <section id="entryBody" style="display: none">
@@ -49,7 +51,9 @@
                     <td><button id="submit">Submit</button></td>
                     <td style="padding-left:1em"><button id="prereview">Pre-Add to Review List</button></td>
                 </tr>
-            </table><br><br>
+            </table>
+            <h3>Question Style:</h3>
+            <p>Ask <span id="ask2">definition</span>&nbsp;&nbsp;&nbsp;<button id="swap2">Swap</button>&nbsp;&nbsp;&nbsp;Answer with <span id="ans2">test</span></p><br><br>
             <div id="incorrectDisplay" style="display: none">
                 <p class="text-align: center;"><b class="err">Incorrect</b> | Correct answer: <span id="correctAns"></span></p>
                 <table>
@@ -70,6 +74,8 @@
                     <td style="padding-left:1em"><button id="homescreen">Return to Home</button></td>
                 </tr>
             </table>
+            <h3>Question Style:</h3>
+            <p>Ask <span id="ask3">definition</span>&nbsp;&nbsp;&nbsp;<button id="swap3">Swap</button>&nbsp;&nbsp;&nbsp;Answer with <span id="ans3">test</span></p>
         </section>
     </body>
     <script type="module">
@@ -124,6 +130,49 @@
             repeatDialogue.style.display = "inline-block";
             extraBreak.style.display = "block";
         });
+        const ask1 = document.getElementById("ask1");
+        const ask2 = document.getElementById("ask2");
+        const ask3 = document.getElementById("ask3");
+        const ans1 = document.getElementById("ans1");
+        const ans2 = document.getElementById("ans2");
+        const ans3 = document.getElementById("ans3");
+        let defaultAnsMode = true;
+        document.getElementById("swap1").addEventListener("click", () => {
+            if (defaultAnsMode) {
+                ask1.innerText = "term";
+                ans1.innerText = "definition";
+                defaultAnsMode = false;
+            }
+            else {
+                ask1.innerText = "definition";
+                ans1.innerText = "term";
+                defaultAnsMode = true;
+            }
+        });
+        document.getElementById("swap2").addEventListener("click", () => {
+            if (defaultAnsMode) {
+                ask2.innerText = "term";
+                ans2.innerText = "definition";
+                defaultAnsMode = false;
+            }
+            else {
+                ask2.innerText = "definition";
+                ans2.innerText = "term";
+                defaultAnsMode = true;
+            }
+        });
+        document.getElementById("swap3").addEventListener("click", () => {
+            if (defaultAnsMode) {
+                ask3.innerText = "term";
+                ans3.innerText = "definition";
+                defaultAnsMode = false;
+            }
+            else {
+                ask3.innerText = "definition";
+                ans3.innerText = "term";
+                defaultAnsMode = true;
+            }
+        });
         let resPtrRef;
         let iPtr;
         let dPtr;
@@ -139,9 +188,14 @@
         homescreen.addEventListener("click", () => {
             entryBody.style.display = "none";
             initBody.style.display = "block";
-            roundCount.innerText = count;
+            if (defaultAnsMode) {
+                ask1.innerText = "definition";
+                ans1.innerText = "term";
+            } else {
+                ask1.innerText = "term";
+                ans1.innerText = "definition";
+            }
             count = 1;
-            report.style.display = "inline-block";
         });
         import Module from "./prog.js";
         Module().then((mod) => {
@@ -223,6 +277,13 @@
                     errParent.style.visibility = "hidden";
                     initBody.style.display = "none";
                     entryBody.style.display = "block";
+                    if (defaultAnsMode) {
+                        ask2.innerText = "definition";
+                        ans2.innerText = "term";
+                    } else {
+                        ask2.innerText = "term";
+                        ans2.innerText = "definition";
+                    }
                     bSdl = sdl;
                     if (sdl < 256) {
                         if (pElems != -1)
@@ -233,7 +294,12 @@
                         iPtr = randPtr;
                         dPtr = randPtr;
                         endPtr = randPtr + sdl - 1;
-                        currentPair = studyDat[mod.HEAPU8[randPtr]];
+                        if (defaultAnsMode)
+                            currentPair = studyDat[mod.HEAPU8[iPtr]];
+                        else {
+                            let tempIndex = mod.HEAPU8[iPtr];
+                            currentPair = [studyDat[tempIndex][1], studyDat[tempIndex][0]];
+                        }
                         ques.innerText = currentPair[1];
                         // end initial function
                         if (pElems >= 256 || pElems == -1) {
@@ -241,10 +307,22 @@
                                 iPtr = randPtr;
                                 dPtr = randPtr;
                                 endPtr = randPtr + sdl - 1;
-                                currentPair = studyDat[mod.HEAPU8[randPtr]];
+                                if (defaultAnsMode)
+                                    currentPair = studyDat[mod.HEAPU8[iPtr]];
+                                else {
+                                    let tempIndex = mod.HEAPU8[iPtr];
+                                    currentPair = [studyDat[tempIndex][1], studyDat[tempIndex][0]];
+                                }
                                 ques.innerText = currentPair[1];
                                 resultsBody.style.display = "none";
                                 entryBody.style.display = "block";
+                                if (defaultAnsMode) {
+                                    ask2.innerText = "definition";
+                                    ans2.innerText = "term";
+                                } else {
+                                    ask2.innerText = "term";
+                                    ans2.innerText = "definition";
+                                }
                             };
                             finishFunction = () => {
                                 let resPtr = randPtr;
@@ -252,6 +330,13 @@
                                 if (sdl != 0) {
                                     entryBody.style.display = "none";
                                     resultsBody.style.display = "block";
+                                    if (defaultAnsMode) {
+                                        ask3.innerText = "definition";
+                                        ans3.innerText = "term";
+                                    } else {
+                                        ask3.innerText = "term";
+                                        ans3.innerText = "definition";
+                                    }
                                     currentPair = studyDat[mod.HEAPU8[resPtr]];
                                     let accumulator = currentPair[0]+lSeparator+currentPair[1];
                                     while (resPtr < dPtr-1) {
@@ -264,6 +349,13 @@
                                 } else {
                                     entryBody.style.display = "none";
                                     initBody.style.display = "block";
+                                    if (defaultAnsMode) {
+                                        ask1.innerText = "definition";
+                                        ans1.innerText = "term";
+                                    } else {
+                                        ask1.innerText = "term";
+                                        ans1.innerText = "definition";
+                                    }
                                     roundCount.innerText = count;
                                     count = 1;
                                     report.style.display = "inline-block";
@@ -286,7 +378,12 @@
                                             return;
                                         }
                                         iPtr++;
-                                        currentPair = studyDat[mod.HEAPU8[iPtr]];
+                                        if (defaultAnsMode)
+                                            currentPair = studyDat[mod.HEAPU8[iPtr]];
+                                        else {
+                                            let tempIndex = mod.HEAPU8[iPtr];
+                                            currentPair = [studyDat[tempIndex][1], studyDat[tempIndex][0]];
+                                        }
                                         ques.innerText = currentPair[1];
                                         ans.value = "";
                                     } else {
@@ -306,7 +403,12 @@
                                             return;
                                         }
                                         iPtr++;
-                                        currentPair = studyDat[mod.HEAPU8[iPtr]];
+                                        if (defaultAnsMode)
+                                            currentPair = studyDat[mod.HEAPU8[iPtr]];
+                                        else {
+                                            let tempIndex = mod.HEAPU8[iPtr];
+                                            currentPair = [studyDat[tempIndex][1], studyDat[tempIndex][0]];
+                                        }
                                         ques.innerText = currentPair[1];
                                         ans.value = "";
                                     } else {
@@ -332,7 +434,12 @@
                                 }
                                 incorrectDisplay.style.display = "none";
                                 iPtr++;
-                                currentPair = studyDat[mod.HEAPU8[iPtr]];
+                                if (defaultAnsMode)
+                                    currentPair = studyDat[mod.HEAPU8[iPtr]];
+                                else {
+                                    let tempIndex = mod.HEAPU8[iPtr];
+                                    currentPair = [studyDat[tempIndex][1], studyDat[tempIndex][0]];
+                                }
                                 ques.innerText = currentPair[1];
                             };
                             skipFunction = () => {
@@ -346,19 +453,36 @@
                                 }
                                 incorrectDisplay.style.display = "none";
                                 iPtr++;
-                                currentPair = studyDat[mod.HEAPU8[iPtr]];
+                                if (defaultAnsMode)
+                                    currentPair = studyDat[mod.HEAPU8[iPtr]];
+                                else {
+                                    let tempIndex = mod.HEAPU8[iPtr];
+                                    currentPair = [studyDat[tempIndex][1], studyDat[tempIndex][0]];
+                                }
                                 ques.innerText = currentPair[1];
                             };
                             restudyFunction = () => {
                                 errParent.style.visibility = "hidden";
                                 initBody.style.display = "none";
                                 entryBody.style.display = "block";
+                                if (defaultAnsMode) {
+                                    ask2.innerText = "definition";
+                                    ans2.innerText = "term";
+                                } else {
+                                    ask2.innerText = "term";
+                                    ans2.innerText = "definition";
+                                }
                                 sdl = bSdl;
                                 mod._b_shuffle(randPtr, sdl);
                                 iPtr = randPtr;
                                 dPtr = randPtr;
                                 endPtr = randPtr + sdl - 1;
-                                currentPair = studyDat[mod.HEAPU8[randPtr]];
+                                if (defaultAnsMode)
+                                    currentPair = studyDat[mod.HEAPU8[iPtr]];
+                                else {
+                                    let tempIndex = mod.HEAPU8[iPtr];
+                                    currentPair = [studyDat[tempIndex][1], studyDat[tempIndex][0]];
+                                }
                                 ques.innerText = currentPair[1];
                             };
                         }
@@ -373,7 +497,12 @@
                         resPtrRef = iPtr;
                         dPtr = iPtr;
                         endPtr = iPtr + sdl - 1;
-                        currentPair = studyDat[mod.HEAPU16[iPtr]];
+                        if (defaultAnsMode)
+                            currentPair = studyDat[mod.HEAPU16[iPtr]];
+                        else {
+                            let tempIndex = mod.HEAPU16[iPtr];
+                            currentPair = [studyDat[tempIndex][1], studyDat[tempIndex][0]];
+                        }
                         ques.innerText = currentPair[1];
                         // end initial function
                         if (pElems < 256) {
@@ -381,10 +510,22 @@
                                 iPtr = resPtrRef;
                                 dPtr = iPtr;
                                 endPtr = iPtr + sdl - 1;
-                                currentPair = studyDat[mod.HEAPU16[iPtr]];
+                                if (defaultAnsMode)
+                                    currentPair = studyDat[mod.HEAPU16[iPtr]];
+                                else {
+                                    let tempIndex = mod.HEAPU16[iPtr];
+                                    currentPair = [studyDat[tempIndex][1], studyDat[tempIndex][0]];
+                                }
                                 ques.innerText = currentPair[1];
                                 resultsBody.style.display = "none";
                                 entryBody.style.display = "block";
+                                if (defaultAnsMode) {
+                                    ask2.innerText = "definition";
+                                    ans2.innerText = "term";
+                                } else {
+                                    ask2.innerText = "term";
+                                    ans2.innerText = "definition";
+                                }
                             };
                             finishFunction = () => {
                                 let resPtr = resPtrRef;
@@ -392,6 +533,13 @@
                                 if (sdl != 0) {
                                     entryBody.style.display = "none";
                                     resultsBody.style.display = "block";
+                                    if (defaultAnsMode) {
+                                        ask3.innerText = "definition";
+                                        ans3.innerText = "term";
+                                    } else {
+                                        ask3.innerText = "term";
+                                        ans3.innerText = "definition";
+                                    }
                                     currentPair = studyDat[mod.HEAPU16[resPtr]];
                                     let accumulator = currentPair[0]+lSeparator+currentPair[1];
                                     while (resPtr < dPtr-1) {
@@ -404,6 +552,13 @@
                                 } else {
                                     entryBody.style.display = "none";
                                     initBody.style.display = "block";
+                                    if (defaultAnsMode) {
+                                        ask1.innerText = "definition";
+                                        ans1.innerText = "term";
+                                    } else {
+                                        ask1.innerText = "term";
+                                        ans1.innerText = "definition";
+                                    }
                                     roundCount.innerText = count;
                                     count = 1;
                                     report.style.display = "inline-block";
@@ -426,7 +581,12 @@
                                             return;
                                         }
                                         iPtr++;
-                                        currentPair = studyDat[mod.HEAPU16[iPtr]];
+                                        if (defaultAnsMode)
+                                            currentPair = studyDat[mod.HEAPU16[iPtr]];
+                                        else {
+                                            let tempIndex = mod.HEAPU16[iPtr];
+                                            currentPair = [studyDat[tempIndex][1], studyDat[tempIndex][0]];
+                                        }
                                         ques.innerText = currentPair[1];
                                         ans.value = "";
                                     } else {
@@ -446,7 +606,12 @@
                                             return;
                                         }
                                         iPtr++;
-                                        currentPair = studyDat[mod.HEAPU16[iPtr]];
+                                        if (defaultAnsMode)
+                                            currentPair = studyDat[mod.HEAPU16[iPtr]];
+                                        else {
+                                            let tempIndex = mod.HEAPU16[iPtr];
+                                            currentPair = [studyDat[tempIndex][1], studyDat[tempIndex][0]];
+                                        }
                                         ques.innerText = currentPair[1];
                                         ans.value = "";
                                     } else {
@@ -472,7 +637,12 @@
                                 }
                                 incorrectDisplay.style.display = "none";
                                 iPtr++;
-                                currentPair = studyDat[mod.HEAPU16[iPtr]];
+                                if (defaultAnsMode)
+                                    currentPair = studyDat[mod.HEAPU16[iPtr]];
+                                else {
+                                    let tempIndex = mod.HEAPU16[iPtr];
+                                    currentPair = [studyDat[tempIndex][1], studyDat[tempIndex][0]];
+                                }
                                 ques.innerText = currentPair[1];
                             };
                             skipFunction = () => {
@@ -486,19 +656,36 @@
                                 }
                                 incorrectDisplay.style.display = "none";
                                 iPtr++;
-                                currentPair = studyDat[mod.HEAPU16[iPtr]];
+                                if (defaultAnsMode)
+                                    currentPair = studyDat[mod.HEAPU16[iPtr]];
+                                else {
+                                    let tempIndex = mod.HEAPU16[iPtr];
+                                    currentPair = [studyDat[tempIndex][1], studyDat[tempIndex][0]];
+                                }
                                 ques.innerText = currentPair[1];
                             };
                             restudyFunction = () => {
                                 errParent.style.visibility = "hidden";
                                 initBody.style.display = "none";
                                 entryBody.style.display = "block";
+                                if (defaultAnsMode) {
+                                    ask2.innerText = "definition";
+                                    ans2.innerText = "term";
+                                } else {
+                                    ask2.innerText = "term";
+                                    ans2.innerText = "definition";
+                                }
                                 sdl = bSdl;
                                 mod._w_shuffle(randPtr, sdl);
                                 iPtr = resPtrRef;
                                 dPtr = iPtr;
                                 endPtr = iPtr + sdl - 1;
-                                currentPair = studyDat[mod.HEAPU16[iPtr]];
+                                if (defaultAnsMode)
+                                    currentPair = studyDat[mod.HEAPU16[iPtr]];
+                                else {
+                                    let tempIndex = mod.HEAPU16[iPtr];
+                                    currentPair = [studyDat[tempIndex][1], studyDat[tempIndex][0]];
+                                }
                                 ques.innerText = currentPair[1];
                             };
                         }
