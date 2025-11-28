@@ -103,21 +103,15 @@
         const entryBody = document.getElementById("entryBody");
         const resultsBody = document.getElementById("resultsBody");
         const ques = document.getElementById("ques");
-        const ans = document.getElementById("ans");
         const incorrectDisplay = document.getElementById("incorrectDisplay");
         const correctAns = document.getElementById("correctAns");
-        const review = document.getElementById("review");
-        const prereview = document.getElementById("prereview");
-        const skip = document.getElementById("skip");
-        const submit = document.getElementById("submit");
         const results = document.getElementById("results");
-        const next = document.getElementById("next");
         const homescreen = document.getElementById("homescreen");
         const roundCount = document.getElementById("roundCount");
         const report = document.getElementById("report");
         const repeatDialogue = document.getElementById("repeatDialogue");
-        const restudy = document.getElementById("restudy");
         const extraBreak = document.getElementById("extraBreak");
+        const ans = document.getElementById("ans");
         let processorFunction = () => {};
         let finishFunction = () => {};
         let prereviewFunction = () => {};
@@ -126,22 +120,13 @@
         let reviewFunction = () => {};
         let skipFunction = () => {};
         let restudyFunction = () => {};
-        next.addEventListener("click", () => processorFunction());
-        prereview.addEventListener("click", () => prereviewFunction());
-        submit.addEventListener("click", () => submitFunction());
+        document.getElementById("next").addEventListener("click", () => processorFunction());
+        document.getElementById("prereview").addEventListener("click", () => prereviewFunction());
+        document.getElementById("submit").addEventListener("click", () => submitFunction());
         ans.addEventListener("keydown", (key) => ansFunction(key));
-        review.addEventListener("click", () => reviewFunction());
-        skip.addEventListener("click", () => skipFunction());
-        restudy.addEventListener("click", () => restudyFunction());
-        homescreen.addEventListener("click", () => {
-            entryBody.style.display = "none";
-            initBody.style.display = "block";
-            roundCount.innerText = count;
-            count = 1;
-            report.style.display = "inline-block";
-            repeatDialogue.style.display = "inline-block";
-            extraBreak.style.display = "block";
-        });
+        document.getElementById("review").addEventListener("click", () => reviewFunction());
+        document.getElementById("skip").addEventListener("click", () => skipFunction());
+        document.getElementById("restudy").addEventListener("click", () => restudyFunction());
         const ask1 = document.getElementById("ask1");
         const ask2 = document.getElementById("ask2");
         const ask3 = document.getElementById("ask3");
@@ -185,6 +170,20 @@
                 defaultAnsMode = true;
             }
         });
+        homescreen.addEventListener("click", () => {
+            entryBody.style.display = "none";
+            initBody.style.display = "block";
+            if (defaultAnsMode) {
+                ask1.innerText = "definition";
+                ans1.innerText = "term";
+            } else {
+                ask1.innerText = "term";
+                ans1.innerText = "definition";
+            }
+            count = 1;
+            repeatDialogue.style.display = "inline-block";
+            extraBreak.style.display = "block";
+        });
         let resPtrRef;
         let iPtr;
         let dPtr;
@@ -197,18 +196,6 @@
         let studyDat;
         let bSdl;
         let randPtr;
-        homescreen.addEventListener("click", () => {
-            entryBody.style.display = "none";
-            initBody.style.display = "block";
-            if (defaultAnsMode) {
-                ask1.innerText = "definition";
-                ans1.innerText = "term";
-            } else {
-                ask1.innerText = "term";
-                ans1.innerText = "definition";
-            }
-            count = 1;
-        });
         import Module from "./prog.js";
         Module().then((mod) => {
             document.getElementById("start").addEventListener("click", () => {
